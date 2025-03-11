@@ -1,13 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
+
+    <!-- 添加中文字体 -->
+    <script>
+    pdfMake.fonts = {
+      SimSun: {
+        normal: 'https://cdn.jsdelivr.net/gh/luoxyhen/fonts@main/simsun.ttf',
+        bold: 'https://cdn.jsdelivr.net/gh/luoxyhen/fonts@main/simsun.ttf',
+        italics: 'https://cdn.jsdelivr.net/gh/luoxyhen/fonts@main/simsun.ttf',
+        bolditalics: 'https://cdn.jsdelivr.net/gh/luoxyhen/fonts@main/simsun.ttf'
+      }
+    };
+    </script>
     <meta charset="UTF-8">
-    <title>国际手机号码生成器</title>
+    <title>国际手机号生成器</title>
     <style>
         body {
             margin: 0;
             padding: 20px;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #d1f2d4, #a8e6ad);
             min-height: 100vh;
         }
@@ -18,38 +33,41 @@
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
 
         .controls {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin: 15px 0;
         }
 
         input[type="text"] {
-            padding: 8px;
+            padding: 10px;
             border: 2px solid #4CAF50;
-            border-radius: 4px;
+            border-radius: 6px;
             flex: 1;
+            font-size: 16px;
         }
 
         button {
-            padding: 8px 15px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            font-size: 14px;
         }
 
         button:hover {
             background-color: #45a049;
+            transform: translateY(-1px);
         }
 
         table {
@@ -58,52 +76,71 @@
             background: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         th {
             background-color: #4CAF50;
             color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
         }
 
         .pagination {
-            margin: 20px 0;
+            margin: 25px 0;
             display: flex;
-            gap: 5px;
+            gap: 8px;
             justify-content: center;
         }
 
         .export-controls {
-            margin-top: 20px;
             display: flex;
-            gap: 10px;
             justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
         }
 
         select {
-            padding: 8px;
+            padding: 9px;
             border: 2px solid #4CAF50;
-            border-radius: 4px;
+            border-radius: 6px;
+            background: white;
+            min-width: 120px;
+        }
+
+        .data-counter {
+            color: #666;
+            font-size: 14px;
+            padding: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2 style="color: #2e7d32;">国际手机号码生成器</h2>
+            <h2 style="color: #2e7d32; margin:0 0 15px">📱 国际手机号生成器</h2>
             <div class="controls">
-                <input type="text" id="country" placeholder="输入国家名称">
+                <input type="text" id="country" placeholder="输入国家/地区（默认中国）" list="countryList">
                 <button onclick="generateNumbers()">生成号码</button>
-                <button onclick="resetAll()">重置</button>
+                <button onclick="resetInput()">重置输入</button>
             </div>
+            <datalist id="countryList">
+                <option>中国</option>
+                <option>美国</option>
+                <option>日本</option>
+                <option>德国</option>
+                <option>印度</option>
+            </datalist>
         </div>
 
+        <div class="data-counter" id="counter">已生成 0 条数据</div>
+        
         <div id="results">
             <table>
                 <thead>
@@ -126,93 +163,308 @@
                 <option value="txt">TXT</option>
                 <option value="csv">CSV</option>
             </select>
-            <button onclick="exportData()">导出</button>
+
+            <!-- 修改导出选项的值对应文件扩展名 -->
+<!--             <select id="exportFormat">
+              <option value="xlsx">Excel3</option>
+              <option value="pdf">PDF</option>
+              <option value="txt">TXT</option>
+              <option value="csv">CSV</option>
+            </select> -->
+            <button onclick="exportData()">导出数据</button>
         </div>
     </div>
 
-    <script>
-        let currentPage = 1;
-        const itemsPerPage = 10;
-        let allData = [];
+<script>
+// 本地存储初始化
+let allData = JSON.parse(localStorage.getItem('phoneNumbers')) || [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
-        const countryData = {
-            '中国': { code: '+86', iso: 'CN', generate: () => `18${Math.random().toString().slice(2,11)}`},
-            '美国': { code: '+1', iso: 'US', generate: () => `555${Math.random().toString().slice(2,9)}`},
-            '英国': { code: '+44', iso: 'GB', generate: () => `7${Math.random().toString().slice(2,11)}`},
-            // 可以继续添加更多国家...
-        };
-
-        function generateNumbers() {
-            const country = document.getElementById('country').value.trim();
-            if (!countryData[country]) {
-                alert('暂不支持该国家');
-                return;
-            }
-
-            const data = countryData[country];
-            allData.push({
-                country,
-                iso: data.iso,
-                code: data.code,
-                number: data.generate()
-            });
-
-            currentPage = 1;
-            renderTable();
-            renderPagination();
+const countryData = {
+    '中国': {
+        code: '+86',
+        iso: 'CN',
+        generate: () => {
+            const prefixes = [
+                '130','131','132','133','134','135','136','137','138','139',
+                '144','146','148','150','151','152','153','155','156','157',
+                '158','159','165','166','170','171','172','173','174','175',
+                '176','177','178','180','181','182','183','184','185','186',
+                '187','188','189','191','198','199'
+            ];
+            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            return prefix + Math.random().toString().slice(2, 11).padEnd(9, '0').slice(0, 9);
         }
-
-        function renderTable() {
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const tbody = document.getElementById('dataBody');
-            tbody.innerHTML = '';
-
-            allData.slice(start, end).forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.country}</td>
-                        <td>${item.iso}</td>
-                        <td>${item.code}</td>
-                        <td>${item.number}</td>
-                    </tr>
-                `;
-            });
+    },
+    '美国': {
+        code: '+1',
+        iso: 'US',
+        generate: () => {
+            const areaCodes = ['201','202','203','205','206','212','213','214','215','216'];
+            return `(${areaCodes[Math.floor(Math.random() * areaCodes.length)]}) ` +
+                `${Math.floor(Math.random()*900)+100}-` +
+                `${Math.floor(Math.random()*9000)+1000}`;
         }
-
-        function renderPagination() {
-            const totalPages = Math.ceil(allData.length / itemsPerPage);
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.innerHTML += `
-                    <button 
-                        style="${i === currentPage ? 'background: #2e7d32' : ''}" 
-                        onclick="changePage(${i})">
-                        ${i}
-                    </button>
-                `;
-            }
+    },
+    '日本': {
+        code: '+81',
+        iso: 'JP', 
+        generate: () => {
+            return `090-${Math.random().toString().slice(2,11)}`; // 手机号专用格式
         }
-
-        function changePage(page) {
-            currentPage = page;
-            renderTable();
+    },
+    '德国': {
+        code: '+49',
+        iso: 'DE',
+        generate: () => {
+            const prefixes = ['0151','0152','0157','0159','0162','0170','0171','0175','0176'];
+            return prefixes[Math.floor(Math.random() * prefixes.length)] + 
+                Math.random().toString().slice(2,9).padEnd(7,'0');
         }
-
-        function resetAll() {
-            allData = [];
-            currentPage = 1;
-            renderTable();
-            renderPagination();
+    },
+    '印度': {
+        code: '+91',
+        iso: 'IN',
+        generate: () => {
+            const codes = ['9849','9000','9963','9700','9885','9010']; // 常见印度移动前缀
+            return `${codes[Math.floor(Math.random() * codes.length)]}` +
+                Math.random().toString().slice(2,10).padEnd(7,'0');
         }
+    }
+};
 
-        function exportData() {
-            const format = document.getElementById('exportFormat').value;
-            // 这里需要实现具体的导出逻辑
-            alert(`导出${format.toUpperCase()}功能需要后端支持或第三方库实现`);
+function generateNumbers() {
+    const countryInput = document.getElementById('country').value.trim();
+    const country = countryInput || '中国';
+    
+    if (!countryData[country]) {
+        alert('不支持该国家/地区');
+        return;
+    }
+
+    const { iso, code, generate } = countryData[country];
+    const batch = Array.from({ length: 10 }, () => ({
+        country,
+        iso,
+        code,
+        number: generate()
+    }));
+
+    allData.push(...batch);
+    localStorage.setItem('phoneNumbers', JSON.stringify(allData));
+    
+    currentPage = Math.ceil(allData.length / itemsPerPage);
+    updateCounter();
+    renderTable();
+    renderPagination();
+}
+
+function renderTable() {
+    const start = (currentPage - 1) * itemsPerPage;
+    const tbody = document.getElementById('dataBody');
+    tbody.innerHTML = allData
+        .slice(start, start + itemsPerPage)
+        .map(item => `
+            <tr>
+                <td>${item.country}</td>
+                <td>${item.iso}</td>
+                <td>${item.code}</td>
+                <td style="font-family: monospace">${item.number}</td>
+            </tr>
+        `).join('');
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(allData.length / itemsPerPage);
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => `
+        <button 
+            class="${i + 1 === currentPage ? 'active' : ''}" 
+            onclick="changePage(${i + 1})">
+            ${i + 1}
+        </button>
+    `).join('');
+}
+
+function changePage(page) {
+    currentPage = page;
+    renderTable();
+}
+
+function resetInput() {
+    document.getElementById('country').value = '';
+}
+
+function updateCounter() {
+    document.getElementById('counter').textContent = `已生成 ${allData.length} 条数据`;
+}
+
+
+// ==================== 导出功能优化 ====================
+function exportData() {
+  const format = document.getElementById('exportFormat').value;
+  try {
+    switch(format) {
+      case 'xlsx':
+        exportExcel();
+        break;
+      case 'pdf':
+        exportPDF();
+        break;
+      case 'txt':
+        exportTextFile();
+        break;
+      case 'csv':
+        exportCSV();
+        break;
+      default:
+        throw new Error('Unsupported format');
+    }
+  } catch (error) {
+    alert(`导出失败: ${error.message}`);
+    console.error(error);
+  }
+}
+// Excel导出优化（增加列宽和样式）
+function exportExcel() {
+  const header = ['国家', '国际缩写', '区号', '手机号码'];
+  const data = allData.map(item => [
+    item.country,
+    item.iso,
+    item.code,
+    item.number
+  ]);
+
+  const worksheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+  
+  // 设置列宽
+  worksheet['!cols'] = [
+    {wch: 15}, // 国家列宽
+    {wch: 10}, // ISO代码
+    {wch: 8},  // 区号
+    {wch: 20}  // 手机号
+  ];
+
+  // 设置标题样式
+  const headerStyle = {
+    font: { bold: true, color: { rgb: "FFFFFF" } },
+    fill: { fgColor: { rgb: "4CAF50" } }
+  };
+  
+  for(let col=0; col<header.length; col++){
+    const cell = XLSX.utils.encode_cell({r:0, c:col});
+    worksheet[cell].s = headerStyle;
+  }
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "手机号码");
+  XLSX.writeFile(workbook, `手机号码_${Date.now()}.xlsx`);
+}
+
+
+// PDF导出优化（中文支持）
+function exportPDF() {
+  const docDefinition = {
+    defaultStyle: {
+      font: 'SimSun', // 使用中文字体
+      fontSize: 10
+    },
+    content: [
+      {
+        text: '国际手机号码列表',
+        style: 'header',
+        alignment: 'center'
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths: ['auto', 'auto', 'auto', '*'],
+          body: [
+            [
+              { text: '国家', style: 'tableHeader' },
+              { text: '国际缩写', style: 'tableHeader' },
+              { text: '区号', style: 'tableHeader' },
+              { text: '手机号码', style: 'tableHeader' }
+            ],
+            ...allData.map(item => [
+              item.country,
+              item.iso,
+              item.code,
+              { text: item.number, font: 'Roboto' // 数字用英文字体 }
+            ])
+          ]
         }
-    </script>
+      }
+    ],
+    styles: {
+      header: {
+        fontSize: 18,
+        bold: true,
+        margin: [0, 0, 0, 10]
+      },
+      tableHeader: {
+        bold: true,
+        fontSize: 12,
+        color: 'white',
+        fillColor: '#4CAF50'
+      }
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).download(`手机号码_${Date.now()}.pdf`);
+}
+
+// 通用TXT导出优化
+function exportTextFile() {
+  const content = allData.map(item => 
+    `国家：${item.country}\t缩写：${item.iso}\t区号：${item.code}\t号码：${item.number}`
+  ).join('\n');
+  
+  const blob = new Blob([content], { 
+    type: 'text/plain;charset=utf-8'
+  });
+  
+  saveAs(blob, `手机号码_${Date.now()}.txt`);
+}
+
+// CSV导出编码优化
+function exportCSV() {
+  const csvContent = [
+    '\ufeff国家,国际缩写,区号,手机号码', // BOM头解决Excel中文乱码
+    ...allData.map(item => 
+      `"${item.country}","${item.iso}","${item.code}","${item.number}"`
+    )
+  ].join('\n');
+  
+  const blob = new Blob([csvContent], { 
+    type: 'text/csv;charset=utf-8'
+  });
+  
+  saveAs(blob, `手机号码_${Date.now()}.csv`);
+}
+
+
+// 文件保存器
+function saveAs(blob, filename) {
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
+// 初始化
+window.onload = () => {
+    updateCounter();
+    renderTable();
+    renderPagination();
+};
+</script>
 </body>
 </html>
