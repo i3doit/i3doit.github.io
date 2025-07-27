@@ -3,63 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>艾兜兜儿AI工具箱 - 终极优化版</title>
-    <link rel="stylesheet" href="https://i3doit.github.io/assets/css/AI_Tools_style.css">
-    <link rel="stylesheet" href="https://i3doit.github.io/assets/js/AI_Tools.js">
+    <title>艾兜兜儿AI工具箱</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://i3doit.github.io/assets/css/AI_Tools_style.css">
 </head>
 <body>
-    <!-- 顶部导航 -->
-    <header>
-        <div class="logo-container">
-            <i class="fas fa-robot logo-icon"></i>
+    <div class="container">
+        <header id="header-trigger">
             <h1>艾兜兜儿AI工具箱</h1>
-        </div>
-        <div class="header-controls">
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="搜索AI工具...">
-                <button id="search-btn"><i class="fas fa-search"></i></button>
+            <p class="subtitle">精选100+实用AI工具，提升您的工作效率与创造力</p>
+        </header>
+        
+        <main>
+            <section class="stats-section" id="stats-section">
+                <div class="stats-header">
+                    <h2 class="stats-title"><i class="fas fa-chart-line"></i> 使用统计</h2>
+                    <div>
+                        <button class="btn" id="refresh-stats">
+                            <i class="fas fa-sync-alt"></i> 刷新
+                        </button>
+                        <span class="close-stats" id="close-stats">&times;</span>
+                    </div>
+                </div>
+                <div class="stats-container" id="stats-container">
+                    <!-- 统计数据会动态添加到这里 -->
+                </div>
+            </section>
+            
+            <section class="add-tool-form" id="add-tool-form">
+                <h2 class="form-title"><i class="fas fa-plus-circle"></i> 添加新工具</h2>
+                <div class="form-group">
+                    <label for="tool-name">工具名称</label>
+                    <input type="text" id="tool-name" placeholder="例如：ChatGPT" required>
+                </div>
+                <div class="form-group">
+                    <label for="tool-url">工具网址</label>
+                    <input type="url" id="tool-url" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="tool-description">工具描述</label>
+                    <textarea id="tool-description" placeholder="请简要描述这个工具的功能和用途..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tool-category">分类</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="tool-category" style="flex: 1;">
+                            <!-- 分类选项会动态添加 -->
+                        </select>
+                        <input type="text" id="new-category" placeholder="新分类名称" style="flex: 1;">
+                    </div>
+                </div>
+                <button class="btn" id="add-tool-btn">
+                    <i class="fas fa-plus"></i> 添加工具
+                </button>
+                <button class="btn" id="close-form-btn">
+                    <i class="fas fa-times"></i> 关闭表单
+                </button>
+            </section>
+            
+            <section class="upload-form" id="upload-form">
+                <h2 class="form-title"><i class="fas fa-upload"></i> 上传HTML工具</h2>
+                <div class="form-group">
+                    <label>上传HTML文件</label>
+                    <div class="file-upload" id="file-upload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击或拖拽文件到此处上传</p>
+                        <p class="file-name" id="file-name">尚未选择文件</p>
+                        <input type="file" id="file-input" accept=".html" style="display: none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="author-name">作者昵称</label>
+                    <input type="text" id="author-name" placeholder="您的昵称" required>
+                </div>
+                <div class="form-group">
+                    <label for="author-wechat">微信号（选填）</label>
+                    <input type="text" id="author-wechat" placeholder="微信号（选填）">
+                </div>
+                <div class="form-group">
+                    <label for="file-description">工具描述（选填）</label>
+                    <textarea id="file-description" placeholder="请简要描述这个工具的功能和用途..."></textarea>
+                </div>
+                <button class="btn" id="upload-btn">
+                    <i class="fas fa-upload"></i> 上传工具
+                </button>
+                <button class="btn" id="close-upload-btn">
+                    <i class="fas fa-times"></i> 关闭
+                </button>
+            </section>
+            
+            <section class="categories-section">
+                <h2 class="categories-title"><i class="fas fa-tags"></i> 分类筛选</h2>
+                <div class="categories-container" id="categories-container">
+                    <!-- 分类按钮会动态添加到这里 -->
+                </div>
+            </section>
+            
+            <section class="tools-section">
+                <h2 class="form-title"><i class="fas fa-th-large"></i> AI工具库</h2>
+                <div class="tools-grid" id="tools-container">
+                    <!-- 工具卡片会动态添加到这里 -->
+                </div>
+                
+                <div class="pagination" id="pagination">
+                    <!-- 分页按钮会动态添加到这里 -->
+                </div>
+            </section>
+        </main>
+        
+        <footer id="footer-trigger">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://t.zsxq.com/11QO9" class="footer-link" target="_blank">
+                        <i class="fas fa-life-ring"></i> 技术支持：艾兜兜儿
+                    </a>
+                    <a href="https://mp.weixin.qq.com/s/aB6rkYbBDi1CDau6hLs1jg" class="footer-link" target="_blank">
+                        <i class="fab fa-weixin"></i> 微信公众号
+                    </a>
+                </div>
+                <p id="copyright">© 2025 艾兜兜儿AI工具箱 | 让AI工具触手可及</p>
             </div>
-            <button id="refresh-btn" title="刷新数据"><i class="fas fa-sync-alt"></i></button>
+        </footer>
+    </div>
+    
+    <!-- 添加按钮提示 -->
+    <div class="add-tool-tip" id="add-tool-tip">
+        <i class="fas fa-check-circle"></i> 添加功能已解锁！
+    </div>
+    
+    <!-- 编辑工具模态框 -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-edit-modal">&times;</span>
+            <h2 class="form-title"><i class="fas fa-edit"></i> 编辑工具</h2>
+            <div class="form-group">
+                <label for="edit-tool-name">工具名称</label>
+                <input type="text" id="edit-tool-name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-tool-url">工具网址</label>
+                <input type="url" id="edit-tool-url" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-tool-description">工具描述</label>
+                <textarea id="edit-tool-description" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-tool-category">分类</label>
+                <select id="edit-tool-category">
+                    <!-- 分类选项会动态添加 -->
+                </select>
+            </div>
+            <input type="hidden" id="edit-tool-id">
+            <button class="btn" id="save-edit-btn">
+                <i class="fas fa-save"></i> 保存更改
+            </button>
         </div>
-    </header>
-
-    <!-- 分类筛选 -->
-    <div class="filters">
-        <div class="filter-group">
-            <button class="filter-btn active" data-category="all">全部</button>
-            <button class="filter-btn" data-category="chat">聊天对话</button>
-            <button class="filter-btn" data-category="image">图像创作</button>
-            <button class="filter-btn" data-category="video">视频生成</button>
-            <button class="filter-btn" data-category="audio">音频处理</button>
-            <button class="filter-btn" data-category="productivity">效率工具</button>
+    </div>
+    
+    <!-- 排行榜模态框 -->
+    <div class="ranking-modal" id="ranking-modal">
+        <div class="ranking-content">
+            <div class="ranking-header">
+                <h3 class="ranking-title" id="ranking-title">排行榜</h3>
+                <span class="close-modal" id="close-ranking">&times;</span>
+            </div>
+            <ul class="ranking-list" id="ranking-list">
+                <!-- 排行榜项会动态添加 -->
+            </ul>
         </div>
-        <div class="filter-info">
-            <span id="tool-count">加载中...</span>
+    </div>
+    
+    <!-- 分享模态框 -->
+    <div class="share-modal" id="share-modal">
+        <div class="share-content">
+            <span class="close-modal" id="close-share">&times;</span>
+            <h3 class="share-title" id="share-title">分享工具</h3>
+            <div class="share-options">
+                <div class="share-option" id="share-wechat">
+                    <div class="share-icon share-wechat">
+                        <i class="fab fa-weixin"></i>
+                    </div>
+                    <span>微信</span>
+                </div>
+                <div class="share-option" id="share-qq">
+                    <div class="share-icon share-qq">
+                        <i class="fab fa-qq"></i>
+                    </div>
+                    <span>QQ</span>
+                </div>
+                <div class="share-option" id="share-weibo">
+                    <div class="share-icon share-weibo">
+                        <i class="fab fa-weibo"></i>
+                    </div>
+                    <span>微博</span>
+                </div>
+            </div>
+            <div class="copy-link">
+                <input type="text" id="share-link" readonly>
+                <button class="copy-btn" id="copy-link">
+                    <i class="fas fa-copy"></i> 复制链接
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- 工具展示区域 -->
-    <main>
-        <div class="loading-container" id="loading">
-            <div class="spinner"></div>
-            <p>正在加载AI工具数据...</p>
-        </div>
-        <div class="tools-container" id="tools-container"></div>
-    </main>
-
-    <!-- 页脚 -->
-    <footer>
-        <div class="footer-content">
-            <p>© 2025 艾兜兜儿AI工具箱 | 数据来源: Google Sheets</p>
-            <div class="footer-links">
-                <a href="#" class="update-time">最后更新: <span id="update-time">--:--:--</span></a>
-                <a href="https://github.com/i3doit" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript文件 -->
-    <script src="AI_Tools.js"></script>
+    <script src="https://i3doit.github.io/assets/js/AI_Tools.js"></script>
 </body>
 </html>
