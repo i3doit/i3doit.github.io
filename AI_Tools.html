@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艾兜兜儿的AI工具箱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #5ac8fa;
+            --background-color: #f5f9ff;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --light-text: #888888;
+            --border-color: #e0e0e0;
+            --success-color: #34c759;
+            --warning-color: #ff9500;
+            --danger-color: #ff3b30;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --category-writing: #ff9aa2;
+            --category-design: #ffb7b2;
+            --category-coding: #b5ead7;
+            --category-research: #c7ceea;
+            --category-video: #e2f0cb;
+            --category-music: #f8c8dc;
+            --category-other: #d8d8d8;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0f0ff, #d4e8ff);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .secret-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+            background: var(--glass-bg);
+            padding: 5px 10px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* 添加工具表单 */
+        .add-tool-form {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 30px;
+            margin: 0 auto 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 700px;
+            backdrop-filter: blur(10px);
+            display: none;
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-title i {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 102, 204, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 工具网格 */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .tool-card {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .tool-icon {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(240, 247, 255, 0.7), rgba(225, 238, 255, 0.7));
+        }
+        
+        .tool-icon i {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tool-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+        
+        .tool-url {
+            color: var(--light-text);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            word-break: break-all;
+            flex-grow: 1;
+        }
+        
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .clicks-count {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tool-category {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .category-writing { background-color: var(--category-writing); }
+        .category-design { background-color: var(--category-design); }
+        .category-coding { background-color: var(--category-coding); }
+        .category-research { background-color: var(--category-research); }
+        .category-video { background-color: var(--category-video); }
+        .category-music { background-color: var(--category-music); }
+        .category-other { background-color: var(--category-other); }
+        
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .visit-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .edit-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            margin-left: 10px;
+        }
+        
+        .edit-btn:hover {
+            background-color: rgba(248, 248, 248, 0.5);
+        }
+        
+        /* 分类筛选 */
+        .categories-section {
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        
+        .categories-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .category-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-btn.active {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+        }
+        
+        /* 分页控制 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0 20px;
+            gap: 10px;
+        }
+        
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+        }
+        
+        .page-btn:hover:not(.active) {
+            background-color: rgba(240, 247, 255, 0.7);
+        }
+        
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--light-text);
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+        
+        .footer-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        .wechat-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--success-color);
+            text-decoration: none;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            position: relative;
+            backdrop-filter: blur(20px);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .add-tool-form {
+                padding: 20px;
+            }
+            
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .secret-hint {
+                position: static;
+                margin-top: 15px;
+            }
+            
+            .categories-container {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 14px;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #c0d6ff;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-15px);}
+            60% {transform: translateY(-7px);}
+        }
+        
+        /* 隐藏触发区域 */
+        .secret-trigger {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 5;
+        }
+        
+        /* 添加按钮提示 */
+        .add-tool-tip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        
+        /* 统计区域 */
+        .stats-section {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 204, 0.1);
+        }
+        
+        .stats-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+        
+        .popular-tool {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI小工具集散地</h1>
+            <p class="subtitle">收集、管理和分享您最喜爱的AI工具，提高工作效率</p>
+            <div class="secret-hint">提示：连续点击底部区域5次可解锁添加功能</div>
+        </header>
+        
+        <main>
+            <section class="stats-section">
+                <h2 class="stats-title"><i class="fas fa-chart-line"></i> 使用统计</h2>
+                <div class="stats-container" id="stats-container">
+                    <!-- 统计数据会动态添加到这里 -->
+                </div>
+            </section>
+            
+            <section class="add-tool-form" id="add-tool-form">
+                <h2 class="form-title"><i class="fas fa-plus-circle"></i> 添加新工具</h2>
+                <div class="form-group">
+                    <label for="tool-name">工具名称</label>
+                    <input type="text" id="tool-name" placeholder="例如：ChatGPT" required>
+                </div>
+                <div class="form-group">
+                    <label for="tool-url">工具网址</label>
+                    <input type="url" id="tool-url" placeholder="https://example.com" required>
+                </div>
+                <button class="btn" id="add-tool-btn">
+                    <i class="fas fa-plus"></i> 添加工具
+                </button>
+                <button class="btn" id="close-form-btn" style="background: #888; margin-top: 10px;">
+                    <i class="fas fa-times"></i> 关闭表单
+                </button>
+            </section>
+            
+            <section class="categories-section">
+                <h2 class="categories-title"><i class="fas fa-tags"></i> 分类筛选</h2>
+                <div class="categories-container" id="categories-container">
+                    <!-- 分类按钮会动态添加到这里 -->
+                </div>
+            </section>
+            
+            <section class="tools-section">
+                <h2 class="form-title"><i class="fas fa-th-large"></i> AI工具库</h2>
+                <div class="tools-grid" id="tools-container">
+                    <!-- 工具卡片会动态添加到这里 -->
+                </div>
+                
+                <div class="pagination" id="pagination">
+                    <!-- 分页按钮会动态添加到这里 -->
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <div class="secret-trigger" id="secret-trigger"></div>
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://t.zsxq.com/11QO9" class="footer-link" target="_blank">
+                        <i class="fas fa-life-ring"></i> 技术支持：艾兜兜儿
+                    </a>
+                    <a href="https://mp.weixin.qq.com/s/aB6rkYbBDi1CDau6hLs1jg" class="footer-link" target="_blank">
+                        <i class="fab fa-weixin"></i> 微信公众号
+                    </a>
+                </div>
+                <p>© 2023 AI小工具集散地 | 让AI工具触手可及</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 添加按钮提示 -->
+    <div class="add-tool-tip" id="add-tool-tip">
+        <i class="fas fa-check-circle"></i> 添加功能已解锁！
+    </div>
+    
+    <!-- 编辑工具模态框 -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-edit-modal">&times;</span>
+            <h2 class="form-title"><i class="fas fa-edit"></i> 编辑工具</h2>
+            <div class="form-group">
+                <label for="edit-tool-name">工具名称</label>
+                <input type="text" id="edit-tool-name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-tool-url">工具网址</label>
+                <input type="url" id="edit-tool-url" required>
+            </div>
+            <input type="hidden" id="edit-tool-id">
+            <button class="btn" id="save-edit-btn">
+                <i class="fas fa-save"></i> 保存更改
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 安全增强函数：防止XSS攻击
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+        
+        // URL安全验证
+        function isValidURL(url) {
+            try {
+                const parsed = new URL(url);
+                return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // 分类关键字映射
+        const categoryKeywords = {
+            '写作': ['写作', '文案', '文章', '内容', '生成', 'grammar', 'copy', 'write', '文本'],
+            '设计': ['设计', '图片', '图像', '绘图', '视觉', 'art', 'design', 'draw', '画', '图'],
+            '编程': ['编程', '代码', '开发', '程序员', '技术', 'code', 'dev', '编程', '开发'],
+            '研究': ['研究', '分析', '数据', '科学', '搜索', 'research', 'analy', 'data', '科学'],
+            '视频': ['视频', '剪辑', '制作', '动画', 'movie', 'video', '剪辑', '动画'],
+            '音乐': ['音乐', '音频', '声音', 'sound', 'music', '音效', '作曲'],
+            '其他': []
+        };
+        
+        // 分类颜色映射
+        const categoryColors = {
+            '写作': 'category-writing',
+            '设计': 'category-design',
+            '编程': 'category-coding',
+            '研究': 'category-research',
+            '视频': 'category-video',
+            '音乐': 'category-music',
+            '其他': 'category-other'
+        };
+        
+        // 示例数据（增强版）
+        const sampleTools = [
+            { id: 1, name: "ChatGPT", url: "https://chat.openai.com", clicks: 42, category: "写作" },
+            { id: 2, name: "Midjourney", url: "https://www.midjourney.com", clicks: 35, category: "设计" },
+            { id: 3, name: "Grammarly", url: "https://www.grammarly.com", clicks: 28, category: "写作" },
+            { id: 4, name: "DALL·E 2", url: "https://openai.com/dall-e-2/", clicks: 31, category: "设计" },
+            { id: 5, name: "Notion AI", url: "https://www.notion.so/product/ai", clicks: 25, category: "写作" },
+            { id: 6, name: "Runway ML", url: "https://runwayml.com", clicks: 19, category: "视频" },
+            { id: 7, name: "Descript", url: "https://www.descript.com", clicks: 16, category: "视频" },
+            { id: 8, name: "Copy.ai", url: "https://www.copy.ai", clicks: 22, category: "写作" },
+            { id: 9, name: "GitHub Copilot", url: "https://github.com/features/copilot", clicks: 38, category: "编程" },
+            { id: 10, name: "Wolfram Alpha", url: "https://www.wolframalpha.com", clicks: 21, category: "研究" },
+            { id: 11, name: "Jasper", url: "https://www.jasper.ai", clicks: 17, category: "写作" },
+            { id: 12, name: "Synthesia", url: "https://www.synthesia.io", clicks: 14, category: "视频" }
+        ];
+        
+        // 工具数组
+        let tools = [];
+        let currentPage = 1;
+        let currentCategory = 'all';
+        const toolsPerPage = 8;
+        
+        // DOM元素
+        const toolsContainer = document.getElementById('tools-container');
+        const paginationContainer = document.getElementById('pagination');
+        const categoriesContainer = document.getElementById('categories-container');
+        const statsContainer = document.getElementById('stats-container');
+        const addToolBtn = document.getElementById('add-tool-btn');
+        const toolNameInput = document.getElementById('tool-name');
+        const toolUrlInput = document.getElementById('tool-url');
+        const editModal = document.getElementById('edit-modal');
+        const editToolName = document.getElementById('edit-tool-name');
+        const editToolUrl = document.getElementById('edit-tool-url');
+        const editToolId = document.getElementById('edit-tool-id');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const closeEditModal = document.getElementById('close-edit-modal');
+        const secretTrigger = document.getElementById('secret-trigger');
+        const addToolForm = document.getElementById('add-tool-form');
+        const closeFormBtn = document.getElementById('close-form-btn');
+        const addToolTip = document.getElementById('add-tool-tip');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTools();
+            renderCategories();
+            renderStats();
+            renderTools();
+            setupEventListeners();
+        });
+        
+        // 加载工具
+        function loadTools() {
+            const savedTools = localStorage.getItem('aiTools');
+            if (savedTools) {
+                tools = JSON.parse(savedTools);
+            } else {
+                // 如果没有保存的数据，使用示例数据
+                tools = [...sampleTools];
+                saveTools();
+            }
+        }
+        
+        // 保存工具
+        function saveTools() {
+            localStorage.setItem('aiTools', JSON.stringify(tools));
+        }
+        
+        // 渲染分类
+        function renderCategories() {
+            categoriesContainer.innerHTML = '';
+            
+            // 添加"全部"分类
+            const allBtn = document.createElement('button');
+            allBtn.className = `category-btn ${currentCategory === 'all' ? 'active' : ''}`;
+            allBtn.textContent = '全部';
+            allBtn.dataset.category = 'all';
+            allBtn.addEventListener('click', () => {
+                currentCategory = 'all';
+                currentPage = 1;
+                renderTools();
+                renderCategories();
+            });
+            categoriesContainer.appendChild(allBtn);
+            
+            // 添加各分类按钮
+            Object.keys(categoryColors).forEach(category => {
+                const categoryBtn = document.createElement('button');
+                categoryBtn.className = `category-btn ${currentCategory === category ? 'active' : ''}`;
+                categoryBtn.textContent = category;
+                categoryBtn.dataset.category = category;
+                categoryBtn.addEventListener('click', () => {
+                    currentCategory = category;
+                    currentPage = 1;
+                    renderTools();
+                    renderCategories();
+                });
+                categoriesContainer.appendChild(categoryBtn);
+            });
+        }
+        
+        // 渲染统计信息
+        function renderStats() {
+            statsContainer.innerHTML = '';
+            
+            // 总工具数
+            const totalTools = document.createElement('div');
+            totalTools.className = 'stat-card';
+            totalTools.innerHTML = `
+                <i class="fas fa-tools" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                <div class="stat-value">${tools.length}</div>
+                <div class="stat-label">总工具数</div>
+            `;
+            statsContainer.appendChild(totalTools);
+            
+            // 总点击量
+            const totalClicks = tools.reduce((sum, tool) => sum + tool.clicks, 0);
+            const clicksCard = document.createElement('div');
+            clicksCard.className = 'stat-card';
+            clicksCard.innerHTML = `
+                <i class="fas fa-mouse-pointer" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                <div class="stat-value">${totalClicks}</div>
+                <div class="stat-label">总点击量</div>
+            `;
+            statsContainer.appendChild(clicksCard);
+            
+            // 最受欢迎工具
+            if (tools.length > 0) {
+                const popularTool = [...tools].sort((a, b) => b.clicks - a.clicks)[0];
+                const popularCard = document.createElement('div');
+                popularCard.className = 'stat-card';
+                popularCard.innerHTML = `
+                    <i class="fas fa-crown" style="color: var(--warning-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${popularTool.clicks}</div>
+                    <div class="stat-label">最受欢迎工具</div>
+                    <div class="popular-tool">${popularTool.name}</div>
+                `;
+                statsContainer.appendChild(popularCard);
+            }
+            
+            // 分类统计
+            const categories = Object.keys(categoryColors);
+            const categoryCount = categories.map(cat => ({
+                name: cat,
+                count: tools.filter(tool => tool.category === cat).length
+            }));
+            
+            const topCategory = [...categoryCount].sort((a, b) => b.count - a.count)[0];
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'stat-card';
+            categoryCard.innerHTML = `
+                <i class="fas fa-tag" style="color: var(--success-color); font-size: 1.5rem;"></i>
+                <div class="stat-value">${topCategory.count}</div>
+                <div class="stat-label">最多工具分类</div>
+                <div class="popular-tool">${topCategory.name}</div>
+            `;
+            statsContainer.appendChild(categoryCard);
+        }
+        
+        // 渲染工具
+        function renderTools() {
+            toolsContainer.innerHTML = '';
+            
+            // 根据当前分类筛选工具
+            let filteredTools = tools;
+            if (currentCategory !== 'all') {
+                filteredTools = tools.filter(tool => tool.category === currentCategory);
+            }
+            
+            if (filteredTools.length === 0) {
+                toolsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>当前分类没有工具</h3>
+                        <p>请尝试其他分类或添加新工具</p>
+                    </div>
+                `;
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            // 计算分页
+            const totalPages = Math.ceil(filteredTools.length / toolsPerPage);
+            const startIndex = (currentPage - 1) * toolsPerPage;
+            const endIndex = Math.min(startIndex + toolsPerPage, filteredTools.length);
+            const toolsToShow = filteredTools.slice(startIndex, endIndex);
+            
+            // 渲染工具卡片
+            toolsToShow.forEach(tool => {
+                const toolCard = document.createElement('div');
+                toolCard.className = 'tool-card';
+                
+                // 安全处理：对名称和URL进行消毒
+                const safeName = sanitizeInput(tool.name);
+                const safeUrl = sanitizeInput(tool.url);
+                
+                toolCard.innerHTML = `
+                    <div class="tool-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="tool-content">
+                        <h3 class="tool-name">${safeName}</h3>
+                        <p class="tool-url">${safeUrl}</p>
+                        <div class="card-stats">
+                            <div class="clicks-count">
+                                <i class="fas fa-mouse-pointer"></i> ${tool.clicks} 次点击
+                            </div>
+                            <span class="tool-category ${categoryColors[tool.category]}">${tool.category}</span>
+                        </div>
+                        <div class="card-actions">
+                            <a href="${tool.url}" target="_blank" class="action-btn visit-btn" data-id="${tool.id}">
+                                <i class="fas fa-external-link-alt"></i> 访问工具
+                            </a>
+                            <button class="action-btn edit-btn" data-id="${tool.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                toolsContainer.appendChild(toolCard);
+            });
+            
+            // 渲染分页
+            renderPagination(totalPages);
+        }
+        
+        // 渲染分页控件
+        function renderPagination(totalPages) {
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 添加上一页按钮
+            const prevBtn = document.createElement('div');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTools();
+                }
+            });
+            paginationContainer.appendChild(prevBtn);
+            
+            // 添加页码按钮
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('div');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTools();
+                });
+                paginationContainer.appendChild(pageBtn);
+            }
+            
+            // 添加下一页按钮
+            const nextBtn = document.createElement('div');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTools();
+                }
+            });
+            paginationContainer.appendChild(nextBtn);
+        }
+        
+        // 自动分类工具
+        function categorizeTool(name) {
+            const lowerName = name.toLowerCase();
+            
+            for (const [category, keywords] of Object.entries(categoryKeywords)) {
+                if (keywords.some(keyword => lowerName.includes(keyword.toLowerCase()))) {
+                    return category;
+                }
+            }
+            
+            return '其他';
+        }
+        
+        // 设置事件监听
+        function setupEventListeners() {
+            // 添加工具按钮
+            addToolBtn.addEventListener('click', addNewTool);
+            
+            // 编辑按钮（事件委托）
+            toolsContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.edit-btn')) {
+                    const toolId = parseInt(e.target.closest('.edit-btn').dataset.id);
+                    openEditModal(toolId);
+                }
+            });
+            
+            // 访问工具按钮（事件委托）
+            toolsContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.visit-btn')) {
+                    const toolId = parseInt(e.target.closest('.visit-btn').dataset.id);
+                    recordToolClick(toolId);
+                }
+            });
+            
+            // 保存编辑
+            saveEditBtn.addEventListener('click', saveEditedTool);
+            
+            // 关闭模态框
+            closeEditModal.addEventListener('click', () => {
+                editModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target === editModal) {
+                    editModal.style.display = 'none';
+                }
+            });
+            
+            // 支持按Enter键添加工具
+            toolNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addNewTool();
+            });
+            
+            toolUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addNewTool();
+            });
+            
+            // 隐藏触发区域
+            let clickCount = 0;
+            let lastClickTime = 0;
+            const clickThreshold = 5; // 需要点击的次数
+            const timeThreshold = 2000; // 时间阈值（毫秒）
+            
+            secretTrigger.addEventListener('click', () => {
+                const now = Date.now();
+                
+                // 如果距离上次点击时间超过阈值，重置计数器
+                if (now - lastClickTime > timeThreshold) {
+                    clickCount = 0;
+                }
+                
+                clickCount++;
+                lastClickTime = now;
+                
+                // 达到点击次数阈值
+                if (clickCount >= clickThreshold) {
+                    // 显示添加表单
+                    addToolForm.style.display = 'block';
+                    
+                    // 显示提示
+                    addToolTip.style.display = 'block';
+                    setTimeout(() => {
+                        addToolTip.style.display = 'none';
+                    }, 3000);
+                    
+                    // 重置计数器
+                    clickCount = 0;
+                    
+                    // 滚动到表单位置
+                    addToolForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+            
+            // 关闭表单按钮
+            closeFormBtn.addEventListener('click', () => {
+                addToolForm.style.display = 'none';
+            });
+        }
+        
+        // 添加新工具
+        function addNewTool() {
+            const name = toolNameInput.value.trim();
+            const url = toolUrlInput.value.trim();
+            
+            if (!name || !url) {
+                alert('请填写工具名称和网址');
+                return;
+            }
+            
+            // 安全增强：验证URL格式和协议
+            if (!isValidURL(url)) {
+                alert('请输入有效的网址（必须以http://或https://开头）');
+                return;
+            }
+            
+            // 自动分类
+            const category = categorizeTool(name);
+            
+            const newTool = {
+                id: Date.now(), // 使用时间戳作为ID
+                name: sanitizeInput(name), // 消毒名称
+                url: sanitizeInput(url),   // 消毒URL
+                clicks: 0,
+                category: category
+            };
+            
+            tools.unshift(newTool);
+            saveTools();
+            renderCategories();
+            renderStats();
+            renderTools();
+            
+            // 重置表单
+            toolNameInput.value = '';
+            toolUrlInput.value = '';
+            
+            // 显示成功提示
+            addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> ${sanitizeInput(name)} 添加成功！`;
+            addToolTip.style.display = 'block';
+            addToolTip.style.background = 'var(--success-color)';
+            setTimeout(() => {
+                addToolTip.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 记录工具点击
+        function recordToolClick(toolId) {
+            const toolIndex = tools.findIndex(t => t.id === toolId);
+            if (toolIndex !== -1) {
+                tools[toolIndex].clicks++;
+                saveTools();
+                renderStats();
+                
+                // 更新当前卡片上的点击量
+                const toolCard = document.querySelector(`.visit-btn[data-id="${toolId}"]`);
+                if (toolCard) {
+                    const clicksElement = toolCard.closest('.tool-content').querySelector('.clicks-count');
+                    if (clicksElement) {
+                        clicksElement.innerHTML = `<i class="fas fa-mouse-pointer"></i> ${tools[toolIndex].clicks} 次点击`;
+                    }
+                }
+            }
+        }
+        
+        // 打开编辑模态框
+        function openEditModal(toolId) {
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+            
+            // 显示消毒后的值
+            editToolName.value = tool.name.replace(/&amp;/g, '&')
+                                           .replace(/&lt;/g, '<')
+                                           .replace(/&gt;/g, '>');
+            editToolUrl.value = tool.url.replace(/&amp;/g, '&')
+                                       .replace(/&lt;/g, '<')
+                                       .replace(/&gt;/g, '>');
+            editToolId.value = toolId;
+            
+            editModal.style.display = 'flex';
+        }
+        
+        // 保存编辑的工具
+        function saveEditedTool() {
+            const toolId = parseInt(editToolId.value);
+            const name = editToolName.value.trim();
+            const url = editToolUrl.value.trim();
+            
+            if (!name || !url) {
+                alert('请填写工具名称和网址');
+                return;
+            }
+            
+            // 安全增强：验证URL格式和协议
+            if (!isValidURL(url)) {
+                alert('请输入有效的网址（必须以http://或https://开头）');
+                return;
+            }
+            
+            const toolIndex = tools.findIndex(t => t.id === toolId);
+            if (toolIndex !== -1) {
+                // 保存消毒后的值
+                tools[toolIndex].name = sanitizeInput(name);
+                tools[toolIndex].url = sanitizeInput(url);
+                tools[toolIndex].category = categorizeTool(name);
+                
+                saveTools();
+                renderCategories();
+                renderStats();
+                renderTools();
+                editModal.style.display = 'none';
+                
+                // 显示成功提示
+                addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> ${sanitizeInput(name)} 更新成功！`;
+                addToolTip.style.display = 'block';
+                addToolTip.style.background = 'var(--success-color)';
+                setTimeout(() => {
+                    addToolTip.style.display = 'none';
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
