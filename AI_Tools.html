@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI小工具集散地</title>
+    <title>艾兜兜儿AI工具箱</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -33,6 +33,9 @@
             --category-video: #e2f0cb;
             --category-music: #f8c8dc;
             --category-other: #d8d8d8;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
         }
         
         body {
@@ -327,15 +330,79 @@
         }
         
         .action-icon.liked {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.favorited {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited i {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited .action-count {
             color: var(--danger-color);
         }
         
         .action-icon.favorited {
-            color: var(--warning-color);
+            background: rgba(255, 59, 48, 0.05);
         }
         
-        .action-icon.shared {
-            color: var(--success-color);
+        .action-icon.favorited:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+        
+        .action-icon.liked {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked i {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked .action-count {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked {
+            background: rgba(0, 102, 204, 0.05);
+        }
+        
+        .action-icon.liked:hover {
+            background: rgba(0, 102, 204, 0.1);
+        }
+        
+        .action-icon.favorited {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited i {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited .action-count {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited {
+            background: rgba(255, 59, 48, 0.05);
+        }
+        
+        .action-icon.favorited:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+        
+        .action-icon.favorited.active {
+            background: rgba(255, 59, 48, 0.15);
+        }
+        
+        .action-icon.liked.active {
+            background: rgba(0, 102, 204, 0.15);
+        }
+        
+        .action-icon.favorited.active {
+            background: rgba(255, 59, 48, 0.15);
         }
         
         /* 分类筛选 */
@@ -757,14 +824,17 @@
             align-items: center;
             padding: 12px 15px;
             border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        
+        .ranking-item:hover {
+            background-color: rgba(0, 102, 204, 0.05);
         }
         
         .ranking-position {
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -772,14 +842,48 @@
             margin-right: 15px;
         }
         
+        .position-1 {
+            background: var(--gold);
+            color: white;
+        }
+        
+        .position-2 {
+            background: var(--silver);
+            color: white;
+        }
+        
+        .position-3 {
+            background: var(--bronze);
+            color: white;
+        }
+        
+        .position-other {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
         .ranking-name {
             flex-grow: 1;
             font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .ranking-name:hover {
+            color: var(--primary-color);
         }
         
         .ranking-value {
             font-weight: 600;
             color: var(--primary-color);
+        }
+        
+        .new-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 8px;
         }
         
         /* 分享模态框 */
@@ -876,8 +980,8 @@
 <body>
     <div class="container">
         <header id="header-trigger">
-            <h1>AI小工具集散地</h1>
-            <p class="subtitle">收集、管理和分享您最喜爱的AI工具，提高工作效率</p>
+            <h1>艾兜兜儿AI工具箱</h1>
+            <p class="subtitle">精选100+实用AI工具，提升您的工作效率与创造力</p>
         </header>
         
         <main>
@@ -987,7 +1091,7 @@
                         <i class="fab fa-weixin"></i> 微信公众号
                     </a>
                 </div>
-                <p>© 2023 AI小工具集散地 | 让AI工具触手可及</p>
+                <p id="copyright">© 2025 艾兜兜儿AI工具箱 | 让AI工具触手可及</p>
             </div>
         </footer>
     </div>
@@ -1068,7 +1172,7 @@
             <div class="copy-link">
                 <input type="text" id="share-link" readonly>
                 <button class="copy-btn" id="copy-link">
-                    <i class="fas fa-copy"></i> 复制
+                    <i class="fas fa-copy"></i> 复制链接
                 </button>
             </div>
         </div>
@@ -1127,7 +1231,8 @@
                 favorites: 45,
                 shares: 18,
                 category: "写作",
-                author: "OpenAI"
+                author: "OpenAI",
+                created: Date.now() - 2 * 24 * 60 * 60 * 1000 // 2天前
             },
             { 
                 id: 2, 
@@ -1140,7 +1245,8 @@
                 favorites: 38,
                 shares: 12,
                 category: "设计",
-                author: "Midjourney团队"
+                author: "Midjourney团队",
+                created: Date.now() - 1 * 24 * 60 * 60 * 1000 // 1天前
             },
             { 
                 id: 3, 
@@ -1153,7 +1259,8 @@
                 favorites: 52,
                 shares: 22,
                 category: "编程",
-                author: "GitHub"
+                author: "GitHub",
+                created: Date.now() - 3 * 24 * 60 * 60 * 1000 // 3天前
             }
         ];
         
@@ -1212,9 +1319,14 @@
         const shareLink = document.getElementById('share-link');
         const copyLinkBtn = document.getElementById('copy-link');
         const closeShare = document.getElementById('close-share');
+        const copyright = document.getElementById('copyright');
         
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            // 更新版权年份
+            const year = new Date().getFullYear();
+            copyright.textContent = `© ${year} 艾兜兜儿AI工具箱 | 让AI工具触手可及`;
+            
             loadTools();
             renderCategories();
             renderCategoryOptions();
@@ -1314,64 +1426,74 @@
             statsContainer.appendChild(totalTools);
             
             // 总点击量
-            const totalClicks = tools.reduce((sum, tool) => sum + tool.clicks, 0);
-            const clicksCard = document.createElement('div');
-            clicksCard.className = 'stat-card';
-            clicksCard.dataset.type = 'clicks';
-            clicksCard.innerHTML = `
-                <i class="fas fa-mouse-pointer" style="color: var(--primary-color); font-size: 1.5rem;"></i>
-                <div class="stat-value">${totalClicks}</div>
-                <div class="stat-label">总点击量</div>
-            `;
-            statsContainer.appendChild(clicksCard);
+            const totalClicks = tools.reduce((sum, tool) => sum + (tool.clicks || 0), 0);
+            if (totalClicks > 0) {
+                const clicksCard = document.createElement('div');
+                clicksCard.className = 'stat-card';
+                clicksCard.dataset.type = 'clicks';
+                clicksCard.innerHTML = `
+                    <i class="fas fa-mouse-pointer" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${totalClicks}</div>
+                    <div class="stat-label">总点击量</div>
+                `;
+                statsContainer.appendChild(clicksCard);
+            }
             
             // 总点赞数
-            const totalLikes = tools.reduce((sum, tool) => sum + tool.likes, 0);
-            const likesCard = document.createElement('div');
-            likesCard.className = 'stat-card';
-            likesCard.dataset.type = 'likes';
-            likesCard.innerHTML = `
-                <i class="fas fa-thumbs-up" style="color: var(--primary-color); font-size: 1.5rem;"></i>
-                <div class="stat-value">${totalLikes}</div>
-                <div class="stat-label">总点赞数</div>
-            `;
-            statsContainer.appendChild(likesCard);
+            const totalLikes = tools.reduce((sum, tool) => sum + (tool.likes || 0), 0);
+            if (totalLikes > 0) {
+                const likesCard = document.createElement('div');
+                likesCard.className = 'stat-card';
+                likesCard.dataset.type = 'likes';
+                likesCard.innerHTML = `
+                    <i class="fas fa-thumbs-up" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${totalLikes}</div>
+                    <div class="stat-label">总点赞数</div>
+                `;
+                statsContainer.appendChild(likesCard);
+            }
             
             // 总喜欢数
-            const totalAffections = tools.reduce((sum, tool) => sum + tool.affections, 0);
-            const affectionsCard = document.createElement('div');
-            affectionsCard.className = 'stat-card';
-            affectionsCard.dataset.type = 'affections';
-            affectionsCard.innerHTML = `
-                <i class="fas fa-heart" style="color: var(--danger-color); font-size: 1.5rem;"></i>
-                <div class="stat-value">${totalAffections}</div>
-                <div class="stat-label">总喜欢数</div>
-            `;
-            statsContainer.appendChild(affectionsCard);
+            const totalAffections = tools.reduce((sum, tool) => sum + (tool.affections || 0), 0);
+            if (totalAffections > 0) {
+                const affectionsCard = document.createElement('div');
+                affectionsCard.className = 'stat-card';
+                affectionsCard.dataset.type = 'affections';
+                affectionsCard.innerHTML = `
+                    <i class="fas fa-heart" style="color: var(--danger-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${totalAffections}</div>
+                    <div class="stat-label">总喜欢数</div>
+                `;
+                statsContainer.appendChild(affectionsCard);
+            }
             
             // 总收藏数
-            const totalFavorites = tools.reduce((sum, tool) => sum + tool.favorites, 0);
-            const favoritesCard = document.createElement('div');
-            favoritesCard.className = 'stat-card';
-            favoritesCard.dataset.type = 'favorites';
-            favoritesCard.innerHTML = `
-                <i class="fas fa-star" style="color: var(--warning-color); font-size: 1.5rem;"></i>
-                <div class="stat-value">${totalFavorites}</div>
-                <div class="stat-label">总收藏数</div>
-            `;
-            statsContainer.appendChild(favoritesCard);
+            const totalFavorites = tools.reduce((sum, tool) => sum + (tool.favorites || 0), 0);
+            if (totalFavorites > 0) {
+                const favoritesCard = document.createElement('div');
+                favoritesCard.className = 'stat-card';
+                favoritesCard.dataset.type = 'favorites';
+                favoritesCard.innerHTML = `
+                    <i class="fas fa-star" style="color: var(--warning-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${totalFavorites}</div>
+                    <div class="stat-label">总收藏数</div>
+                `;
+                statsContainer.appendChild(favoritesCard);
+            }
             
             // 总分享数
-            const totalShares = tools.reduce((sum, tool) => sum + tool.shares, 0);
-            const sharesCard = document.createElement('div');
-            sharesCard.className = 'stat-card';
-            sharesCard.dataset.type = 'shares';
-            sharesCard.innerHTML = `
-                <i class="fas fa-share-alt" style="color: var(--success-color); font-size: 1.5rem;"></i>
-                <div class="stat-value">${totalShares}</div>
-                <div class="stat-label">总分享数</div>
-            `;
-            statsContainer.appendChild(sharesCard);
+            const totalShares = tools.reduce((sum, tool) => sum + (tool.shares || 0), 0);
+            if (totalShares > 0) {
+                const sharesCard = document.createElement('div');
+                sharesCard.className = 'stat-card';
+                sharesCard.dataset.type = 'shares';
+                sharesCard.innerHTML = `
+                    <i class="fas fa-share-alt" style="color: var(--success-color); font-size: 1.5rem;"></i>
+                    <div class="stat-value">${totalShares}</div>
+                    <div class="stat-label">总分享数</div>
+                `;
+                statsContainer.appendChild(sharesCard);
+            }
         }
         
         // 渲染排行榜
@@ -1379,23 +1501,40 @@
             rankingTitle.textContent = title;
             rankingList.innerHTML = '';
             
-            // 排序工具
-            const sortedTools = [...tools].sort((a, b) => b[type] - a[type]).slice(0, 10);
+            // 过滤掉没有数据的工具
+            const validTools = tools.filter(tool => tool[type] > 0);
             
-            if (sortedTools.length === 0) {
+            if (validTools.length === 0) {
                 rankingList.innerHTML = '<li class="ranking-item">暂无数据</li>';
                 return;
             }
             
+            // 排序工具
+            const sortedTools = [...validTools].sort((a, b) => b[type] - a[type]).slice(0, 10);
+            
             sortedTools.forEach((tool, index) => {
                 const rankingItem = document.createElement('li');
                 rankingItem.className = 'ranking-item';
+                
+                // 检查是否是24小时内新增
+                const isNew = (Date.now() - tool.created) < 24 * 60 * 60 * 1000;
+                
                 rankingItem.innerHTML = `
-                    <div class="ranking-position">${index + 1}</div>
-                    <div class="ranking-name">${tool.name}</div>
+                    <div class="ranking-position ${index === 0 ? 'position-1' : index === 1 ? 'position-2' : index === 2 ? 'position-3' : 'position-other'}">${index + 1}</div>
+                    <div class="ranking-name" data-url="${tool.url}">${tool.name}${isNew ? '<span class="new-badge">🆕</span>' : ''}</div>
                     <div class="ranking-value">${tool[type]}</div>
                 `;
                 rankingList.appendChild(rankingItem);
+            });
+            
+            // 添加点击事件
+            rankingList.querySelectorAll('.ranking-name').forEach(name => {
+                name.addEventListener('click', (e) => {
+                    const url = e.currentTarget.dataset.url;
+                    if (url) {
+                        window.open(url, '_blank');
+                    }
+                });
             });
             
             rankingModal.style.display = 'flex';
@@ -1450,7 +1589,7 @@
                         <div class="tool-description">${safeDesc}</div>
                         <div class="card-stats">
                             <div class="clicks-count">
-                                <i class="fas fa-mouse-pointer"></i> ${tool.clicks} 次点击
+                                <i class="fas fa-mouse-pointer"></i> ${tool.clicks || 0} 次点击
                             </div>
                             <span class="tool-category ${categoryColors[tool.category] || 'category-other'}">${tool.category}</span>
                         </div>
@@ -1463,21 +1602,21 @@
                             </button>
                         </div>
                         <div class="action-buttons">
-                            <div class="action-icon like-btn" data-id="${tool.id}">
+                            <div class="action-icon like-btn ${tool.userLiked ? 'liked active' : ''}" data-id="${tool.id}" data-type="likes">
                                 <i class="fas fa-thumbs-up"></i>
-                                <span class="action-count">${tool.likes}</span>
+                                <span class="action-count">${tool.likes || 0}</span>
                             </div>
-                            <div class="action-icon affection-btn" data-id="${tool.id}">
+                            <div class="action-icon affection-btn ${tool.userAffection ? 'favorited active' : ''}" data-id="${tool.id}" data-type="affections">
                                 <i class="fas fa-heart"></i>
-                                <span class="action-count">${tool.affections}</span>
+                                <span class="action-count">${tool.affections || 0}</span>
                             </div>
-                            <div class="action-icon favorite-btn" data-id="${tool.id}">
+                            <div class="action-icon favorite-btn ${tool.userFavorited ? 'favorited active' : ''}" data-id="${tool.id}" data-type="favorites">
                                 <i class="fas fa-star"></i>
-                                <span class="action-count">${tool.favorites}</span>
+                                <span class="action-count">${tool.favorites || 0}</span>
                             </div>
-                            <div class="action-icon share-btn" data-id="${tool.id}">
+                            <div class="action-icon share-btn" data-id="${tool.id}" data-type="shares">
                                 <i class="fas fa-share-alt"></i>
-                                <span class="action-count">${tool.shares}</span>
+                                <span class="action-count">${tool.shares || 0}</span>
                             </div>
                         </div>
                     </div>
@@ -1580,30 +1719,18 @@
                 }
             });
             
-            // 点赞按钮（事件委托）
+            // 互动按钮（事件委托）
             toolsContainer.addEventListener('click', (e) => {
-                const likeBtn = e.target.closest('.like-btn');
-                if (likeBtn) {
-                    const toolId = parseInt(likeBtn.dataset.id);
-                    updateInteractionCount(toolId, 'likes');
-                }
-                
-                const affectionBtn = e.target.closest('.affection-btn');
-                if (affectionBtn) {
-                    const toolId = parseInt(affectionBtn.dataset.id);
-                    updateInteractionCount(toolId, 'affections');
-                }
-                
-                const favoriteBtn = e.target.closest('.favorite-btn');
-                if (favoriteBtn) {
-                    const toolId = parseInt(favoriteBtn.dataset.id);
-                    updateInteractionCount(toolId, 'favorites');
-                }
-                
-                const shareBtn = e.target.closest('.share-btn');
-                if (shareBtn) {
-                    const toolId = parseInt(shareBtn.dataset.id);
-                    openShareModal(toolId);
+                const interactionBtn = e.target.closest('.action-icon');
+                if (interactionBtn) {
+                    const toolId = parseInt(interactionBtn.dataset.id);
+                    const type = interactionBtn.dataset.type;
+                    
+                    if (type === 'shares') {
+                        openShareModal(toolId);
+                    } else {
+                        updateInteractionCount(toolId, type, interactionBtn);
+                    }
                 }
             });
             
@@ -1853,7 +1980,8 @@
                 affections: 0,
                 favorites: 0,
                 shares: 0,
-                category: category
+                category: category,
+                created: Date.now()
             };
             
             tools.unshift(newTool);
@@ -1906,7 +2034,8 @@
                     favorites: 0,
                     shares: 0,
                     category: category,
-                    author: `${author}${wechat ? ` (微信: ${wechat})` : ''}`
+                    author: `${author}${wechat ? ` (微信: ${wechat})` : ''}`,
+                    created: Date.now()
                 };
                 
                 tools.unshift(newTool);
@@ -1938,7 +2067,7 @@
         function recordToolClick(toolId) {
             const toolIndex = tools.findIndex(t => t.id === toolId);
             if (toolIndex !== -1) {
-                tools[toolIndex].clicks++;
+                tools[toolIndex].clicks = (tools[toolIndex].clicks || 0) + 1;
                 saveTools();
                 
                 // 如果统计面板已显示，则更新
@@ -1949,25 +2078,51 @@
         }
         
         // 更新互动计数
-        function updateInteractionCount(toolId, type) {
+        function updateInteractionCount(toolId, type, interactionBtn) {
             const toolIndex = tools.findIndex(t => t.id === toolId);
-            if (toolIndex !== -1) {
-                tools[toolIndex][type]++;
-                saveTools();
+            if (toolIndex === -1) return;
+            
+            // 检查用户是否已经操作过
+            const userKey = `user_${type}_${toolId}`;
+            const hasInteracted = localStorage.getItem(userKey);
+            
+            if (hasInteracted) {
+                // 如果已经操作过，则取消操作
+                tools[toolIndex][type] = Math.max(0, (tools[toolIndex][type] || 0) - 1);
+                localStorage.removeItem(userKey);
                 
-                // 更新UI
-                const toolCard = document.querySelector(`.tool-card[data-id="${toolId}"]`);
-                if (toolCard) {
-                    const countElement = toolCard.querySelector(`.${type}-btn .action-count`);
-                    if (countElement) {
-                        countElement.textContent = tools[toolIndex][type];
-                    }
+                // 移除激活状态
+                interactionBtn.classList.remove('active');
+                if (type === 'affections' || type === 'favorites') {
+                    interactionBtn.classList.remove('favorited');
+                } else if (type === 'likes') {
+                    interactionBtn.classList.remove('liked');
                 }
+            } else {
+                // 如果未操作过，则增加计数
+                tools[toolIndex][type] = (tools[toolIndex][type] || 0) + 1;
+                localStorage.setItem(userKey, 'true');
                 
-                // 如果统计面板已显示，则更新
-                if (statsSection.style.display === 'block') {
-                    renderStats();
+                // 添加激活状态
+                interactionBtn.classList.add('active');
+                if (type === 'affections' || type === 'favorites') {
+                    interactionBtn.classList.add('favorited');
+                } else if (type === 'likes') {
+                    interactionBtn.classList.add('liked');
                 }
+            }
+            
+            saveTools();
+            
+            // 更新UI
+            const countElement = interactionBtn.querySelector('.action-count');
+            if (countElement) {
+                countElement.textContent = tools[toolIndex][type] || 0;
+            }
+            
+            // 如果统计面板已显示，则更新
+            if (statsSection.style.display === 'block') {
+                renderStats();
             }
         }
         
