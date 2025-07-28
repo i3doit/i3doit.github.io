@@ -516,6 +516,16 @@ function activateAdminMode() {
         addToolTip.style.display = 'none';
     }, 3000);
 }
+// 管理员登录逻辑
+document.getElementById('admin-login').addEventListener('click', () => {
+  const password = prompt('请输入管理员密码:');
+  if (password === 'ADMIN_PASSWORD') {
+    localStorage.setItem('admin_token', 'SECURE_ADMIN_TOKEN');
+    window.location.href = 'admin.html';
+  } else {
+    alert('密码错误');
+  }
+});
 
 // 设置事件监听
 function setupEventListeners() {
