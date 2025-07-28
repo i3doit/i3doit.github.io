@@ -37,58 +37,20 @@ const categoryColors = {
     '其他': 'category-other'
 };
 
-// 示例数据（增强版）
-const sampleTools = [
-    { 
-        id: 1, 
-        name: "ChatGPT", 
-        url: "https://chat.openai.com", 
-        description: "强大的AI对话模型，能回答各种问题、生成创意内容和协助完成复杂任务",
-        clicks: 42, 
-        likes: 35,
-        affections: 28,
-        favorites: 45,
-        shares: 18,
-        category: "写作",
-        author: "OpenAI",
-        created: Date.now() - 2 * 24 * 60 * 60 * 1000 // 2天前
-    },
-    { 
-        id: 2, 
-        name: "Midjourney", 
-        url: "https://www.midjourney.com", 
-        description: "AI图像生成工具，通过文本描述创建令人惊叹的艺术作品和设计",
-        clicks: 35, 
-        likes: 28,
-        affections: 32,
-        favorites: 38,
-        shares: 12,
-        category: "设计",
-        author: "Midjourney团队",
-        created: Date.now() - 1 * 24 * 60 * 60 * 1000 // 1天前
-    },
-    { 
-        id: 3, 
-        name: "GitHub Copilot", 
-        url: "https://github.com/features/copilot", 
-        description: "AI编程助手，帮助开发者更快地编写代码，提供智能代码补全建议",
-        clicks: 38, 
-        likes: 42,
-        affections: 37,
-        favorites: 52,
-        shares: 22,
-        category: "编程",
-        author: "GitHub",
-        created: Date.now() - 3 * 24 * 60 * 60 * 1000 // 3天前
-    }
-];
+// Google Sheets配置
+const GOOGLE_SHEETS_API_KEY = 'YOUR_API_KEY'; // 替换为你的API密钥
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // 替换为你的电子表格ID
 
-// 工具数组
+// 工具数组（从Google Sheets加载）
 let tools = [];
+// 分类数组（从Google Sheets加载）
+let categories = [];
+// 互动数据（从Google Sheets加载）
+let interactions = [];
+
 let currentPage = 1;
 let currentCategory = 'all';
 const toolsPerPage = 8;
-let categories = Object.keys(categoryColors);
 
 // 用户状态（模拟管理员）
 let isAdminMode = false;
@@ -141,40 +103,113 @@ const closeShare = document.getElementById('close-share');
 const copyright = document.getElementById('copyright');
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // 更新版权年份
     const year = new Date().getFullYear();
     copyright.textContent = `© ${year} 艾兜兜儿AI工具箱 | 让AI工具触手可及`;
     
-    loadTools();
+    // 从Google Sheets加载数据
+    await loadDataFromSheets();
+    
+    // 渲染页面
     renderCategories();
     renderCategoryOptions();
     renderTools();
     setupEventListeners();
 });
 
-// 加载工具
-function loadTools() {
+// 从Google Sheets加载数据
+async function loadDataFromSheets() {
+    try {
+        // 1. 加载工具数据
+        const toolsRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/AI_Tools!A1:I?key=${GOOGLE_SHEETS_API_KEY}`
+        );
+        const toolsData = await toolsRes.json();
+        
+        // 2. 加载分类数据
+        const catsRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Categories!A1:C?key=${GOOGLE_SHEETS_API_KEY}`
+        );
+        const catsData = await catsRes.json();
+        
+        // 3. 加载互动数据
+        const interRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/Interactions!A1:D?key=${GOOGLE_SHEETS_API_KEY}`
+        );
+        const interData = await interRes.json();
+        
+        // 处理数据
+        tools = processSheetData(toolsData.values);
+        categories = processCategories(catsData.values);
+        interactions = processSheetData(interData.values);
+        
+        console.log('Data loaded from Google Sheets:', { tools, categories, interactions });
+    } catch (error) {
+        console.error('Error loading data from Google Sheets:', error);
+        // 如果加载失败，使用本地存储作为后备
+        loadToolsFromLocalStorage();
+    }
+}
+
+// 处理表单数据（转换为对象数组）
+function processSheetData(rows) {
+    if (!rows || rows.length < 2) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).map(row => {
+        return headers.reduce((obj, header, index) => {
+            obj[header] = row[index] || '';
+            return obj;
+        }, {});
+    });
+}
+
+// 处理分类数据并构建分类树
+function processCategories(rows) {
+    if (!rows || rows.length < 2) return [];
+    
+    const headers = rows[0].map(h => h.trim());
+    const categories = rows.slice(1).map(row => {
+        return headers.reduce((obj, header, index) => {
+            obj[header] = row[index] || '';
+            return obj;
+        }, {});
+    });
+    
+    // 构建分类树
+    const map = {};
+    const tree = [];
+    
+    categories.forEach(cat => {
+        map[cat.ID] = { ...cat, children: [] };
+    });
+    
+    categories.forEach(cat => {
+        if (cat.ParentID && map[cat.ParentID]) {
+            map[cat.ParentID].children.push(map[cat.ID]);
+        } else {
+            tree.push(map[cat.ID]);
+        }
+    });
+    
+    // 提取分类名称
+    return tree.map(cat => cat.CategoryName);
+}
+
+// 从本地存储加载工具（后备方案）
+function loadToolsFromLocalStorage() {
     const savedTools = localStorage.getItem('aiTools');
     const savedCategories = localStorage.getItem('aiCategories');
     
     if (savedTools) {
         tools = JSON.parse(savedTools);
-    } else {
-        // 如果没有保存的数据，使用示例数据
-        tools = [...sampleTools];
-        saveTools();
     }
     
     if (savedCategories) {
         categories = JSON.parse(savedCategories);
+    } else {
+        categories = Object.keys(categoryColors);
     }
-}
-
-// 保存工具
-function saveTools() {
-    localStorage.setItem('aiTools', JSON.stringify(tools));
-    localStorage.setItem('aiCategories', JSON.stringify(categories));
 }
 
 // 渲染分类
@@ -245,7 +280,7 @@ function renderStats() {
     statsContainer.appendChild(totalTools);
     
     // 总点击量
-    const totalClicks = tools.reduce((sum, tool) => sum + (tool.clicks || 0), 0);
+    const totalClicks = tools.reduce((sum, tool) => sum + (parseInt(tool.Views) || 0), 0);
     if (totalClicks > 0) {
         const clicksCard = document.createElement('div');
         clicksCard.className = 'stat-card';
@@ -258,36 +293,8 @@ function renderStats() {
         statsContainer.appendChild(clicksCard);
     }
     
-    // 总点赞数
-    const totalLikes = tools.reduce((sum, tool) => sum + (tool.likes || 0), 0);
-    if (totalLikes > 0) {
-        const likesCard = document.createElement('div');
-        likesCard.className = 'stat-card';
-        likesCard.dataset.type = 'likes';
-        likesCard.innerHTML = `
-            <i class="fas fa-thumbs-up" style="color: var(--primary-color); font-size: 1.5rem;"></i>
-            <div class="stat-value">${totalLikes}</div>
-            <div class="stat-label">总点赞数</div>
-        `;
-        statsContainer.appendChild(likesCard);
-    }
-    
-    // 总喜欢数
-    const totalAffections = tools.reduce((sum, tool) => sum + (tool.affections || 0), 0);
-    if (totalAffections > 0) {
-        const affectionsCard = document.createElement('div');
-        affectionsCard.className = 'stat-card';
-        affectionsCard.dataset.type = 'affections';
-        affectionsCard.innerHTML = `
-            <i class="fas fa-heart" style="color: var(--danger-color); font-size: 1.5rem;"></i>
-            <div class="stat-value">${totalAffections}</div>
-            <div class="stat-label">总喜欢数</div>
-        `;
-        statsContainer.appendChild(affectionsCard);
-    }
-    
     // 总收藏数
-    const totalFavorites = tools.reduce((sum, tool) => sum + (tool.favorites || 0), 0);
+    const totalFavorites = tools.reduce((sum, tool) => sum + (parseInt(tool.Saves) || 0), 0);
     if (totalFavorites > 0) {
         const favoritesCard = document.createElement('div');
         favoritesCard.className = 'stat-card';
@@ -299,51 +306,50 @@ function renderStats() {
         `;
         statsContainer.appendChild(favoritesCard);
     }
-    
-    // 总分享数
-    const totalShares = tools.reduce((sum, tool) => sum + (tool.shares || 0), 0);
-    if (totalShares > 0) {
-        const sharesCard = document.createElement('div');
-        sharesCard.className = 'stat-card';
-        sharesCard.dataset.type = 'shares';
-        sharesCard.innerHTML = `
-            <i class="fas fa-share-alt" style="color: var(--success-color); font-size: 1.5rem;"></i>
-            <div class="stat-value">${totalShares}</div>
-            <div class="stat-label">总分享数</div>
-        `;
-        statsContainer.appendChild(sharesCard);
-    }
 }
 
-// 渲染排行榜
+// 渲染排行榜（使用Google Sheets互动数据）
 function renderRanking(type, title) {
     rankingTitle.textContent = title;
     rankingList.innerHTML = '';
     
-    // 过滤掉没有数据的工具
-    const validTools = tools.filter(tool => tool[type] > 0);
+    // 从互动数据中统计每个工具的互动次数
+    const toolStats = {};
     
-    if (validTools.length === 0) {
+    interactions.forEach(inter => {
+        if (inter.Action === type) {
+            if (!toolStats[inter.ToolID]) toolStats[inter.ToolID] = 0;
+            toolStats[inter.ToolID]++;
+        }
+    });
+    
+    // 转换为数组并排序
+    const sortedStats = Object.entries(toolStats)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+    
+    if (sortedStats.length === 0) {
         rankingList.innerHTML = '<li class="ranking-item">暂无数据</li>';
         return;
     }
     
-    // 排序工具
-    const sortedTools = [...validTools].sort((a, b) => b[type] - a[type]).slice(0, 10);
-    
-    sortedTools.forEach((tool, index) => {
-        const rankingItem = document.createElement('li');
-        rankingItem.className = 'ranking-item';
-        
-        // 检查是否是24小时内新增
-        const isNew = (Date.now() - tool.created) < 24 * 60 * 60 * 1000;
-        
-        rankingItem.innerHTML = `
-            <div class="ranking-position ${index === 0 ? 'position-1' : index === 1 ? 'position-2' : index === 2 ? 'position-3' : 'position-other'}">${index + 1}</div>
-            <div class="ranking-name" data-url="${tool.url}">${tool.name}${isNew ? '<span class="new-badge">🆕</span>' : ''}</div>
-            <div class="ranking-value">${tool[type]}</div>
-        `;
-        rankingList.appendChild(rankingItem);
+    // 渲染排行榜
+    sortedStats.forEach(([toolId, count], index) => {
+        const tool = tools.find(t => t.ID == toolId);
+        if (tool) {
+            const rankingItem = document.createElement('li');
+            rankingItem.className = 'ranking-item';
+            
+            // 检查是否是24小时内新增（如果工具有Created字段）
+            const isNew = tool.Created && (Date.now() - new Date(tool.Created).getTime()) < 24 * 60 * 60 * 1000;
+            
+            rankingItem.innerHTML = `
+                <div class="ranking-position ${index === 0 ? 'position-1' : index === 1 ? 'position-2' : index === 2 ? 'position-3' : 'position-other'}">${index + 1}</div>
+                <div class="ranking-name" data-url="${tool.URL}">${tool.Name}${isNew ? '<span class="new-badge">🆕</span>' : ''}</div>
+                <div class="ranking-value">${count}</div>
+            `;
+            rankingList.appendChild(rankingItem);
+        }
     });
     
     // 添加点击事件
@@ -366,7 +372,7 @@ function renderTools() {
     // 根据当前分类筛选工具
     let filteredTools = tools;
     if (currentCategory !== 'all') {
-        filteredTools = tools.filter(tool => tool.category === currentCategory);
+        filteredTools = tools.filter(tool => tool.Categories === currentCategory);
     }
     
     if (filteredTools.length === 0) {
@@ -391,12 +397,11 @@ function renderTools() {
     toolsToShow.forEach(tool => {
         const toolCard = document.createElement('div');
         toolCard.className = 'tool-card';
-        toolCard.dataset.id = tool.id;
+        toolCard.dataset.id = tool.ID;
         
         // 安全处理：对名称和描述进行消毒
-        const safeName = sanitizeInput(tool.name);
-        const safeDesc = sanitizeInput(tool.description);
-        const safeAuthor = tool.author ? sanitizeInput(tool.author) : '';
+        const safeName = sanitizeInput(tool.Name);
+        const safeDesc = sanitizeInput(tool.Description);
         
         toolCard.innerHTML = `
             <div class="tool-content">
@@ -404,38 +409,33 @@ function renderTools() {
                     <span>${safeName}</span>
                     <span class="tool-admin-badge">管理员</span>
                 </div>
-                ${safeAuthor ? `<div class="tool-author"><i class="fas fa-user"></i> 作者: ${safeAuthor}</div>` : ''}
                 <div class="tool-description">${safeDesc}</div>
                 <div class="card-stats">
                     <div class="clicks-count">
-                        <i class="fas fa-mouse-pointer"></i> ${tool.clicks || 0} 次点击
+                        <i class="fas fa-mouse-pointer"></i> ${parseInt(tool.Views) || 0} 次点击
                     </div>
-                    <span class="tool-category ${categoryColors[tool.category] || 'category-other'}">${tool.category}</span>
+                    <span class="tool-category ${categoryColors[tool.Categories] || 'category-other'}">${tool.Categories}</span>
                 </div>
                 <div class="card-actions">
-                    <a href="${tool.url}" target="_blank" class="action-btn visit-btn" data-id="${tool.id}">
+                    <a href="${tool.URL}" target="_blank" class="action-btn visit-btn" data-id="${tool.ID}">
                         <i class="fas fa-rocket"></i> 去使用
                     </a>
-                    <button class="action-btn edit-btn" data-id="${tool.id}">
+                    <button class="action-btn edit-btn" data-id="${tool.ID}">
                         <i class="fas fa-edit"></i> 修改
                     </button>
                 </div>
                 <div class="action-buttons">
-                    <div class="action-icon like-btn ${tool.userLiked ? 'liked active' : ''}" data-id="${tool.id}" data-type="likes">
+                    <div class="action-icon like-btn" data-id="${tool.ID}" data-type="like">
                         <i class="fas fa-thumbs-up"></i>
-                        <span class="action-count">${tool.likes || 0}</span>
+                        <span class="action-count">${parseInt(tool.Likes) || 0}</span>
                     </div>
-                    <div class="action-icon affection-btn ${tool.userAffection ? 'favorited active' : ''}" data-id="${tool.id}" data-type="affections">
-                        <i class="fas fa-heart"></i>
-                        <span class="action-count">${tool.affections || 0}</span>
-                    </div>
-                    <div class="action-icon favorite-btn ${tool.userFavorited ? 'favorited active' : ''}" data-id="${tool.id}" data-type="favorites">
+                    <div class="action-icon favorite-btn" data-id="${tool.ID}" data-type="save">
                         <i class="fas fa-star"></i>
-                        <span class="action-count">${tool.favorites || 0}</span>
+                        <span class="action-count">${parseInt(tool.Saves) || 0}</span>
                     </div>
-                    <div class="action-icon share-btn" data-id="${tool.id}" data-type="shares">
+                    <div class="action-icon share-btn" data-id="${tool.ID}" data-type="share">
                         <i class="fas fa-share-alt"></i>
-                        <span class="action-count">${tool.shares || 0}</span>
+                        <span class="action-count">${parseInt(tool.Shares) || 0}</span>
                     </div>
                 </div>
             </div>
@@ -525,7 +525,7 @@ function setupEventListeners() {
     // 编辑按钮（事件委托）
     toolsContainer.addEventListener('click', (e) => {
         if (e.target.closest('.edit-btn') && isAdminMode) {
-            const toolId = parseInt(e.target.closest('.edit-btn').dataset.id);
+            const toolId = e.target.closest('.edit-btn').dataset.id;
             openEditModal(toolId);
         }
     });
@@ -533,7 +533,7 @@ function setupEventListeners() {
     // 访问工具按钮（事件委托）
     toolsContainer.addEventListener('click', (e) => {
         if (e.target.closest('.visit-btn')) {
-            const toolId = parseInt(e.target.closest('.visit-btn').dataset.id);
+            const toolId = e.target.closest('.visit-btn').dataset.id;
             recordToolClick(toolId);
         }
     });
@@ -542,10 +542,10 @@ function setupEventListeners() {
     toolsContainer.addEventListener('click', (e) => {
         const interactionBtn = e.target.closest('.action-icon');
         if (interactionBtn) {
-            const toolId = parseInt(interactionBtn.dataset.id);
+            const toolId = interactionBtn.dataset.id;
             const type = interactionBtn.dataset.type;
             
-            if (type === 'shares') {
+            if (type === 'share') {
                 openShareModal(toolId);
             } else {
                 updateInteractionCount(toolId, type, interactionBtn);
@@ -636,8 +636,8 @@ function setupEventListeners() {
         const card = e.target.closest('.tool-card');
         if (!card) return;
         
-        const toolId = parseInt(card.dataset.id);
-        const tool = tools.find(t => t.id === toolId);
+        const toolId = card.dataset.id;
+        const tool = tools.find(t => t.ID === toolId);
         if (!tool) return;
         
         if (!tool.clickCount) tool.clickCount = 0;
@@ -718,17 +718,8 @@ function setupEventListeners() {
                 case 'clicks':
                     title = '点击量排行榜';
                     break;
-                case 'likes':
-                    title = '点赞数排行榜';
-                    break;
-                case 'affections':
-                    title = '喜欢数排行榜';
-                    break;
                 case 'favorites':
                     title = '收藏数排行榜';
-                    break;
-                case 'shares':
-                    title = '分享数排行榜';
                     break;
                 default:
                     title = '排行榜';
@@ -756,7 +747,7 @@ function setupEventListeners() {
     });
 }
 
-// 添加新工具
+// 添加新工具（暂存到本地存储，后续添加API写入）
 function addNewTool() {
     const name = toolNameInput.value.trim();
     const url = toolUrlInput.value.trim();
@@ -768,7 +759,6 @@ function addNewTool() {
     if (newCategory && !categories.includes(newCategory)) {
         category = newCategory;
         categories.push(newCategory);
-        saveTools();
         renderCategories();
         renderCategoryOptions();
     }
@@ -789,22 +779,23 @@ function addNewTool() {
         category = categorizeTool(name);
     }
     
+    // 创建新工具对象
     const newTool = {
-        id: Date.now(),
-        name: sanitizeInput(name),
-        url: sanitizeInput(url),
-        description: sanitizeInput(description),
-        clicks: 0,
-        likes: 0,
-        affections: 0,
-        favorites: 0,
-        shares: 0,
-        category: category,
-        created: Date.now()
+        ID: `local_${Date.now()}`,
+        Name: sanitizeInput(name),
+        URL: sanitizeInput(url),
+        Description: sanitizeInput(description),
+        Categories: category,
+        Views: 0,
+        Saves: 0,
+        Shares: 0,
+        Created: new Date().toISOString()
     };
     
+    // 添加到工具数组
     tools.unshift(newTool);
-    saveTools();
+    
+    // 更新UI
     renderCategories();
     renderTools();
     
@@ -836,154 +827,177 @@ function uploadFile() {
     }
     
     const file = fileInput.files[0];
-    const reader = new FileReader();
     
-    reader.onload = function(e) {
-        // 这里可以处理文件内容，但为了简化，我们只使用文件名
-        const category = categorizeTool(name);
-        
-        const newTool = {
-            id: Date.now(),
-            name: sanitizeInput(name),
-            url: URL.createObjectURL(file),
-            description: description || `由 ${author} 上传的HTML工具`,
-            clicks: 0,
-            likes: 0,
-            affections: 0,
-            favorites: 0,
-            shares: 0,
-            category: category,
-            author: `${author}${wechat ? ` (微信: ${wechat})` : ''}`,
-            created: Date.now()
-        };
-        
-        tools.unshift(newTool);
-        saveTools();
-        renderCategories();
-        renderTools();
-        
-        // 重置表单
-        fileInput.value = '';
-        fileName.textContent = '尚未选择文件';
-        authorName.value = '';
-        authorWechat.value = '';
-        fileDescription.value = '';
-        uploadForm.style.display = 'none';
-        
-        // 显示成功提示
-        addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> ${sanitizeInput(name)} 上传成功！`;
-        addToolTip.style.display = 'block';
-        addToolTip.style.background = 'var(--success-color)';
-        setTimeout(() => {
-            addToolTip.style.display = 'none';
-        }, 3000);
+    // 创建新工具对象
+    const newTool = {
+        ID: `local_${Date.now()}`,
+        Name: sanitizeInput(name),
+        URL: URL.createObjectURL(file),
+        Description: description || `由 ${author} 上传的HTML工具`,
+        Categories: categorizeTool(name),
+        Views: 0,
+        Saves: 0,
+        Shares: 0,
+        Author: `${author}${wechat ? ` (微信: ${wechat})` : ''}`,
+        Created: new Date().toISOString()
     };
     
-    reader.readAsText(file);
+    // 添加到工具数组
+    tools.unshift(newTool);
+    
+    // 更新UI
+    renderCategories();
+    renderTools();
+    
+    // 重置表单
+    fileInput.value = '';
+    fileName.textContent = '尚未选择文件';
+    authorName.value = '';
+    authorWechat.value = '';
+    fileDescription.value = '';
+    uploadForm.style.display = 'none';
+    
+    // 显示成功提示
+    addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> ${sanitizeInput(name)} 上传成功！`;
+    addToolTip.style.display = 'block';
+    addToolTip.style.background = 'var(--success-color)';
+    setTimeout(() => {
+        addToolTip.style.display = 'none';
+    }, 3000);
 }
 
 // 记录工具点击
 function recordToolClick(toolId) {
-    const toolIndex = tools.findIndex(t => t.id === toolId);
+    const toolIndex = tools.findIndex(t => t.ID === toolId);
     if (toolIndex !== -1) {
-        tools[toolIndex].clicks = (tools[toolIndex].clicks || 0) + 1;
-        saveTools();
+        // 更新本地视图计数
+        tools[toolIndex].Views = (parseInt(tools[toolIndex].Views) || 0) + 1;
         
         // 如果统计面板已显示，则更新
         if (statsSection.style.display === 'block') {
             renderStats();
         }
+        
+        // 记录互动到Google Sheets（模拟）
+        recordInteraction(toolId, 'view');
+    }
+}
+
+// 记录互动到Google Sheets
+async function recordInteraction(toolId, action) {
+    // 这里应该调用Google Apps Script API
+    console.log(`Recording interaction: ToolID=${toolId}, Action=${action}`);
+    
+    // 模拟API调用
+    try {
+        // 实际实现：
+        // await fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
+        //   method: 'POST',
+        //   body: JSON.stringify({
+        //     ToolID: toolId,
+        //     Action: action,
+        //     Timestamp: new Date().toISOString(),
+        //     UserID: localStorage.getItem('user_id') || generateUserId()
+        //   })
+        // });
+        
+        console.log(`Interaction recorded: ${action} for tool ${toolId}`);
+    } catch (error) {
+        console.error('Error recording interaction:', error);
     }
 }
 
 // 更新互动计数
 function updateInteractionCount(toolId, type, interactionBtn) {
-    const toolIndex = tools.findIndex(t => t.id === toolId);
+    const toolIndex = tools.findIndex(t => t.ID === toolId);
     if (toolIndex === -1) return;
     
     // 检查用户是否已经操作过
     const userKey = `user_${type}_${toolId}`;
     const hasInteracted = localStorage.getItem(userKey);
     
+    // 获取当前计数
+    let currentCount = parseInt(tools[toolIndex][type === 'like' ? 'Likes' : type === 'save' ? 'Saves' : 'Shares']) || 0;
+    
     if (hasInteracted) {
         // 如果已经操作过，则取消操作
-        tools[toolIndex][type] = Math.max(0, (tools[toolIndex][type] || 0) - 1);
+        currentCount = Math.max(0, currentCount - 1);
         localStorage.removeItem(userKey);
         
         // 移除激活状态
         interactionBtn.classList.remove('active');
-        if (type === 'affections' || type === 'favorites') {
-            interactionBtn.classList.remove('favorited');
-        } else if (type === 'likes') {
-            interactionBtn.classList.remove('liked');
-        }
     } else {
         // 如果未操作过，则增加计数
-        tools[toolIndex][type] = (tools[toolIndex][type] || 0) + 1;
+        currentCount++;
         localStorage.setItem(userKey, 'true');
         
         // 添加激活状态
         interactionBtn.classList.add('active');
-        if (type === 'affections' || type === 'favorites') {
-            interactionBtn.classList.add('favorited');
-        } else if (type === 'likes') {
-            interactionBtn.classList.add('liked');
-        }
     }
     
-    saveTools();
+    // 更新工具对象
+    if (type === 'like') {
+        tools[toolIndex].Likes = currentCount;
+    } else if (type === 'save') {
+        tools[toolIndex].Saves = currentCount;
+    } else if (type === 'share') {
+        tools[toolIndex].Shares = currentCount;
+    }
     
     // 更新UI
     const countElement = interactionBtn.querySelector('.action-count');
     if (countElement) {
-        countElement.textContent = tools[toolIndex][type] || 0;
+        countElement.textContent = currentCount;
     }
     
     // 如果统计面板已显示，则更新
     if (statsSection.style.display === 'block') {
         renderStats();
     }
+    
+    // 记录互动
+    recordInteraction(toolId, type);
 }
 
 // 打开分享模态框
 function openShareModal(toolId) {
-    const tool = tools.find(t => t.id === toolId);
+    const tool = tools.find(t => t.ID === toolId);
     if (!tool) return;
     
-    shareTitle.textContent = `分享: ${tool.name}`;
+    shareTitle.textContent = `分享: ${tool.Name}`;
     shareLink.value = window.location.href.split('?')[0] + `?tool=${toolId}`;
     shareModal.style.display = 'flex';
     
     // 更新分享计数
-    updateInteractionCount(toolId, 'shares');
+    updateInteractionCount(toolId, 'share');
 }
 
 // 打开编辑模态框
 function openEditModal(toolId) {
-    const tool = tools.find(t => t.id === toolId);
+    const tool = tools.find(t => t.ID === toolId);
     if (!tool) return;
     
     // 显示消毒后的值
-    editToolName.value = tool.name.replace(/&amp;/g, '&')
+    editToolName.value = tool.Name.replace(/&amp;/g, '&')
                                    .replace(/&lt;/g, '<')
                                    .replace(/&gt;/g, '>');
-    editToolUrl.value = tool.url.replace(/&amp;/g, '&')
+    editToolUrl.value = tool.URL.replace(/&amp;/g, '&')
                                .replace(/&lt;/g, '<')
                                .replace(/&gt;/g, '>');
-    editToolDesc.value = tool.description.replace(/&amp;/g, '&')
+    editToolDesc.value = tool.Description.replace(/&amp;/g, '&')
                                        .replace(/&lt;/g, '<')
                                        .replace(/&gt;/g, '>');
     editToolId.value = toolId;
     
     // 设置分类选择
-    editToolCategory.value = tool.category;
+    editToolCategory.value = tool.Categories;
     
     editModal.style.display = 'flex';
 }
 
 // 保存编辑的工具
 function saveEditedTool() {
-    const toolId = parseInt(editToolId.value);
+    const toolId = editToolId.value;
     const name = editToolName.value.trim();
     const url = editToolUrl.value.trim();
     const description = editToolDesc.value.trim();
@@ -1000,15 +1014,14 @@ function saveEditedTool() {
         return;
     }
     
-    const toolIndex = tools.findIndex(t => t.id === toolId);
+    const toolIndex = tools.findIndex(t => t.ID === toolId);
     if (toolIndex !== -1) {
         // 保存消毒后的值
-        tools[toolIndex].name = sanitizeInput(name);
-        tools[toolIndex].url = sanitizeInput(url);
-        tools[toolIndex].description = sanitizeInput(description);
-        tools[toolIndex].category = category;
+        tools[toolIndex].Name = sanitizeInput(name);
+        tools[toolIndex].URL = sanitizeInput(url);
+        tools[toolIndex].Description = sanitizeInput(description);
+        tools[toolIndex].Categories = category;
         
-        saveTools();
         renderCategories();
         renderTools();
         editModal.style.display = 'none';
