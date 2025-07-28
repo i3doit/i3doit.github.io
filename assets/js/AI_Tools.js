@@ -38,8 +38,8 @@ const categoryColors = {
 };
 
 // Google Sheets配置
-const GOOGLE_SHEETS_API_KEY = 'YOUR_API_KEY'; // 替换为你的API密钥
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // 替换为你的电子表格ID
+const GOOGLE_SHEETS_API_KEY = 'AKfycbxrBw6eYu7YV1VOMhDgFDP01QjvzKnO7kFTUHZmbWuqB8yRMMtA1-mvfv9PkpJfOgDxvw'; // 替换为你的API密钥
+const SPREADSHEET_ID = '1-WO9PGnJOZDlR38OZW_l96Sv3brp2AT5CwMI4bFdg5U'; // 替换为你的电子表格ID
 
 // 工具数组（从Google Sheets加载）
 let tools = [];
