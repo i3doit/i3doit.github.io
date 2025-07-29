@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艾兜兜儿AI工具箱</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #5ac8fa;
+            --background-color: #f5f9ff;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --light-text: #888888;
+            --border-color: #e0e0e0;
+            --success-color: #34c759;
+            --warning-color: #ff9500;
+            --danger-color: #ff3b30;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --category-writing: #ff9aa2;
+            --category-design: #ffb7b2;
+            --category-coding: #b5ead7;
+            --category-research: #c7ceea;
+            --category-video: #e2f0cb;
+            --category-music: #f8c8dc;
+            --category-other: #d8d8d8;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --search-height: 60px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e0f0ff, #d4e8ff);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        /* 搜索区域 */
+        .search-section {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 20px;
+            margin: 0 auto 30px;
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 204, 0.1);
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        .search-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .search-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .search-results-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--light-text);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        /* 添加工具表单 */
+        .add-tool-form {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 30px;
+            margin: 0 auto 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 700px;
+            backdrop-filter: blur(10px);
+            display: none;
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-title i {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 102, 204, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #ff6b6b);
+        }
+        
+        /* 工具网格 */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .tool-card {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .tool-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tool-description {
+            color: var(--text-color);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+        
+        .tool-author {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .card-stats {
+            display: none;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            background: rgba(240, 247, 255, 0.6);
+            border-radius: 10px;
+        }
+        
+        .clicks-count {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tool-category {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .category-writing { background-color: var(--category-writing); }
+        .category-design { background-color: var(--category-design); }
+        .category-coding { background-color: var(--category-coding); }
+        .category-research { background-color: var(--category-research); }
+        .category-video { background-color: var(--category-video); }
+        .category-music { background-color: var(--category-music); }
+        .category-other { background-color: var(--category-other); }
+        
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 12px 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .visit-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+        
+        .edit-btn {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .action-icon {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(0, 102, 204, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-icon:hover {
+            background: rgba(0, 102, 204, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .action-icon i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .action-count {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .action-icon.liked {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.favorited {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited i {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited .action-count {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited {
+            background: rgba(255, 59, 48, 0.05);
+        }
+        
+        .action-icon.favorited:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+        
+        .action-icon.liked {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked i {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked .action-count {
+            color: var(--primary-color);
+        }
+        
+        .action-icon.liked {
+            background: rgba(0, 102, 204, 0.05);
+        }
+        
+        .action-icon.liked:hover {
+            background: rgba(0, 102, 204, 0.1);
+        }
+        
+        .action-icon.favorited {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited i {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited .action-count {
+            color: var(--danger-color);
+        }
+        
+        .action-icon.favorited {
+            background: rgba(255, 59, 48, 0.05);
+        }
+        
+        .action-icon.favorited:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+        
+        .action-icon.favorited.active {
+            background: rgba(255, 59, 48, 0.15);
+        }
+        
+        .action-icon.liked.active {
+            background: rgba(0, 102, 204, 0.15);
+        }
+        
+        .action-icon.favorited.active {
+            background: rgba(255, 59, 48, 0.15);
+        }
+        
+        /* 分类筛选 */
+        .categories-section {
+            margin-bottom: 30px;
+            padding: 0 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .categories-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 15px;
+        }
+        
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .category-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category-btn.active {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+        }
+        
+        .import-export {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        
+        /* 分页控制 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0 20px;
+            gap: 10px;
+        }
+        
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: var(--glass-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .page-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: transparent;
+        }
+        
+        .page-btn:hover:not(.active) {
+            background-color: rgba(240, 247, 255, 0.7);
+        }
+        
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--light-text);
+            margin-top: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+        
+        .footer-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            position: relative;
+            backdrop-filter: blur(20px);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .add-tool-form {
+                padding: 20px;
+            }
+            
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .categories-container {
+                justify-content: center;
+            }
+            
+            .categories-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .import-export {
+                margin-left: 0;
+                margin-top: 15px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 14px;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #c0d6ff;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--light-text);
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 添加按钮提示 */
+        .add-tool-tip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        
+        /* 统计区域 */
+        .stats-section {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            display: none;
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stats-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-stats {
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--light-text);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+        
+        .popular-tool {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+        
+        .tool-admin-badge {
+            display: none;
+            background: rgba(0, 102, 204, 0.1);
+            color: var(--primary-color);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        /* 上传文件表单 */
+        .upload-form {
+            background: var(--glass-bg);
+            border-radius: 18px;
+            padding: 30px;
+            margin: 0 auto 40px;
+            box-shadow: var(--box-shadow);
+            max-width: 700px;
+            backdrop-filter: blur(10px);
+            display: none;
+            border: 1px solid rgba(0, 102, 204, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--light-text);
+            margin-bottom: 15px;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* 排行榜模态框 */
+        .ranking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .ranking-content {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            position: relative;
+            backdrop-filter: blur(20px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .ranking-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .ranking-list {
+            list-style: none;
+        }
+        
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        
+        .ranking-item:hover {
+            background-color: rgba(0, 102, 204, 0.05);
+        }
+        
+        .ranking-position {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .position-1 {
+            background: var(--gold);
+            color: white;
+        }
+        
+        .position-2 {
+            background: var(--silver);
+            color: white;
+        }
+        
+        .position-3 {
+            background: var(--bronze);
+            color: white;
+        }
+        
+        .position-other {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .ranking-name {
+            flex-grow: 1;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .ranking-name:hover {
+            color: var(--primary-color);
+        }
+        
+        .ranking-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .new-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+        
+        /* 分享模态框 */
+        .share-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .share-content {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            position: relative;
+            backdrop-filter: blur(20px);
+            text-align: center;
+        }
+        
+        .share-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .share-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .share-option:hover {
+            transform: translateY(-5px);
+        }
+        
+        .share-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .share-wechat { background-color: #07C160; color: white; }
+        .share-qq { background-color: #12B7F5; color: white; }
+        .share-weibo { background-color: #E6162D; color: white; }
+        .share-link { background-color: var(--primary-color); color: white; }
+        
+        .copy-link {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        .copy-link input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .copy-btn {
+            padding: 10px 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="header-trigger">
+            <h1>艾兜兜儿AI工具箱</h1>
+            <p class="subtitle">精选实用AI工具，提升您的工作效率与创造力</p>
+        </header>
+        
+        <main>
+            <!-- 搜索区域 -->
+            <section class="search-section">
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="搜索AI工具...">
+                    <button id="search-btn" class="btn">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </div>
+                <div class="search-options">
+                    <div class="search-option">
+                        <input type="radio" id="fuzzy-search" name="search-type" value="fuzzy" checked>
+                        <label for="fuzzy-search">模糊搜索</label>
+                    </div>
+                    <div class="search-option">
+                        <input type="radio" id="exact-search" name="search-type" value="exact">
+                        <label for="exact-search">精确搜索</label>
+                    </div>
+                </div>
+                <div class="search-results-info">
+                    <span id="results-count">显示全部工具</span>
+                    <button id="clear-search" class="btn-outline" style="padding: 5px 10px; display: none;">
+                        <i class="fas fa-times"></i> 清除搜索
+                    </button>
+                </div>
+            </section>
+            
+            <section class="stats-section" id="stats-section">
+                <div class="stats-header">
+                    <h2 class="stats-title"><i class="fas fa-chart-line"></i> 使用统计</h2>
+                    <div>
+                        <button class="btn" id="refresh-stats" style="padding: 8px 15px; margin-right: 10px;">
+                            <i class="fas fa-sync-alt"></i> 刷新
+                        </button>
+                        <span class="close-stats" id="close-stats">&times;</span>
+                    </div>
+                </div>
+                <div class="stats-container" id="stats-container">
+                    <!-- 统计数据会动态添加到这里 -->
+                </div>
+            </section>
+            
+            <section class="add-tool-form" id="add-tool-form">
+                <h2 class="form-title"><i class="fas fa-plus-circle"></i> 添加新工具</h2>
+                <div class="form-group">
+                    <label for="tool-name">工具名称 <span class="required">*</span></label>
+                    <input type="text" id="tool-name" placeholder="例如：ChatGPT" required>
+                </div>
+                <div class="form-group">
+                    <label for="tool-url">工具网址 <span class="required">*</span></label>
+                    <input type="url" id="tool-url" placeholder="https://example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="tool-description">工具描述</label>
+                    <textarea id="tool-description" placeholder="请简要描述这个工具的功能和用途..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tool-category">分类</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="tool-category" style="flex: 1;">
+                            <option value="">请选择分类</option>
+                            <!-- 分类选项会动态添加 -->
+                        </select>
+                        <input type="text" id="new-category" placeholder="输入新分类" style="flex: 1;">
+                    </div>
+                    <div id="category-suggestions" style="margin-top: 8px; display: none; background: #f0f8ff; padding: 8px; border-radius: 8px;">
+                        <p style="font-size: 0.8rem; margin-bottom: 5px;">匹配的分类：</p>
+                        <div id="suggested-categories" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn" id="add-tool-btn">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <button class="btn btn-outline" id="reset-form-btn">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                    <button class="btn" id="close-form-btn" style="background: #888;">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>
+            </section>
+            
+            <section class="categories-section">
+                <h2 class="categories-title"><i class="fas fa-tags"></i> 分类筛选</h2>
+                <div class="categories-container" id="categories-container">
+                    <!-- 分类按钮会动态添加到这里 -->
+                </div>
+                <div class="import-export">
+                    <button class="btn" id="export-btn" style="padding: 8px 15px;">
+                        <i class="fas fa-download"></i> 导出
+                    </button>
+                    <button class="btn" id="import-btn" style="padding: 8px 15px; background: var(--success-color);">
+                        <i class="fas fa-upload"></i> 导入
+                    </button>
+                </div>
+            </section>
+            
+            <section class="tools-section">
+                <h2 class="form-title"><i class="fas fa-th-large"></i> AI工具库</h2>
+                <div class="tools-grid" id="tools-container">
+                    <!-- 工具卡片会动态添加到这里 -->
+                </div>
+                
+                <div class="pagination" id="pagination">
+                    <!-- 分页按钮会动态添加到这里 -->
+                </div>
+            </section>
+        </main>
+        
+        <footer id="footer-trigger">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://t.zsxq.com/11QO9" class="footer-link" target="_blank">
+                        <i class="fas fa-life-ring"></i> 技术支持：艾兜兜儿
+                    </a>
+                    <a href="https://mp.weixin.qq.com/s/aB6rkYbBDi1CDau6hLs1jg" class="footer-link" target="_blank">
+                        <i class="fab fa-weixin"></i> 微信公众号
+                    </a>
+                </div>
+                <p id="copyright">© 2025 艾兜兜儿AI工具箱 | 让AI工具触手可及</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 添加按钮提示 -->
+    <div class="add-tool-tip" id="add-tool-tip">
+        <i class="fas fa-check-circle"></i> 添加功能已解锁！
+    </div>
+    
+    <!-- 导入模态框 -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-import-modal">&times;</span>
+            <h2 class="form-title"><i class="fas fa-file-import"></i> 导入工具数据</h2>
+            <div class="form-group">
+                <label>选择文件格式</label>
+                <div class="file-format">
+                    <button class="btn" id="import-json-btn" style="margin-bottom: 10px;">
+                        <i class="fas fa-file-code"></i> 导入 JSON
+                    </button>
+                    <button class="btn" id="import-excel-btn" style="background: var(--success-color);">
+                        <i class="fas fa-file-excel"></i> 导入 Excel
+                    </button>
+                </div>
+            </div>
+            <div class="form-group" id="import-file-container" style="display: none;">
+                <label>上传文件</label>
+                <div class="file-upload" id="import-file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>点击或拖拽文件到此处上传</p>
+                    <p class="file-name" id="import-file-name">尚未选择文件</p>
+                    <input type="file" id="import-file-input" style="display: none;">
+                </div>
+            </div>
+            <div class="form-group" id="import-options" style="display: none;">
+                <label>导入选项</label>
+                <div class="search-option">
+                    <input type="radio" id="replace-data" name="import-option" value="replace" checked>
+                    <label for="replace-data">替换现有数据</label>
+                </div>
+                <div class="search-option">
+                    <input type="radio" id="merge-data" name="import-option" value="merge">
+                    <label for="merge-data">合并到现有数据</label>
+                </div>
+            </div>
+            <button class="btn" id="confirm-import-btn" style="display: none; margin-top: 20px;">
+                <i class="fas fa-check"></i> 确认导入
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 安全增强函数：防止XSS攻击
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+        
+        // URL安全验证
+        function isValidURL(url) {
+            try {
+                const parsed = new URL(url);
+                return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // 分类关键字映射
+        const categoryKeywords = {
+            '写作': ['写作', '文案', '文章', '内容', '生成', 'grammar', 'copy', 'write', '文本'],
+            '设计': ['设计', '图片', '图像', '绘图', '视觉', 'art', 'design', 'draw', '画', '图'],
+            '编程': ['编程', '代码', '开发', '程序员', '技术', 'code', 'dev', '编程', '开发'],
+            '研究': ['研究', '分析', '数据', '科学', '搜索', 'research', 'analy', 'data', '科学'],
+            '视频': ['视频', '剪辑', '制作', '动画', 'movie', 'video', '剪辑', '动画'],
+            '音乐': ['音乐', '音频', '声音', 'sound', 'music', '音效', '作曲'],
+            '其他': []
+        };
+        
+        // 分类颜色映射
+        const categoryColors = {
+            '写作': 'category-writing',
+            '设计': 'category-design',
+            '编程': 'category-coding',
+            '研究': 'category-research',
+            '视频': 'category-video',
+            '音乐': 'category-music',
+            '其他': 'category-other'
+        };
+        
+        // 示例数据（增强版）
+        const sampleTools = [
+            { 
+                id: 1, 
+                name: "ChatGPT", 
+                url: "https://chat.openai.com", 
+                description: "强大的AI对话模型，能回答各种问题、生成创意内容和协助完成复杂任务",
+                clicks: 42, 
+                likes: 35,
+                affections: 28,
+                favorites: 45,
+                shares: 18,
+                category: "写作",
+                author: "OpenAI",
+                created: Date.now() - 2 * 24 * 60 * 60 * 1000 // 2天前
+            },
+            { 
+                id: 2, 
+                name: "Midjourney", 
+                url: "https://www.midjourney.com", 
+                description: "AI图像生成工具，通过文本描述创建令人惊叹的艺术作品和设计",
+                clicks: 35, 
+                likes: 28,
+                affections: 32,
+                favorites: 38,
+                shares: 12,
+                category: "设计",
+                author: "Midjourney团队",
+                created: Date.now() - 1 * 24 * 60 * 60 * 1000 // 1天前
+            },
+            { 
+                id: 3, 
+                name: "GitHub Copilot", 
+                url: "https://github.com/features/copilot", 
+                description: "AI编程助手，帮助开发者更快地编写代码，提供智能代码补全建议",
+                clicks: 38, 
+                likes: 42,
+                affections: 37,
+                favorites: 52,
+                shares: 22,
+                category: "编程",
+                author: "GitHub",
+                created: Date.now() - 3 * 24 * 60 * 60 * 1000 // 3天前
+            },
+            { 
+                id: 4, 
+                name: "老照片修复", 
+                url: "https://i3doit.github.io/MyTools/OldPhotoRestoration.html", 
+                description: "一键修复老照片",
+                clicks: 38, 
+                likes: 42,
+                affections: 37,
+                favorites: 52,
+                shares: 22,
+                category: "设计",
+                author: "艾兜兜儿",
+                created: Date.now() - 3 * 24 * 60 * 60 * 1000 // 3天前
+            },
+            { 
+                id: 5, 
+                name: "AI视频编辑", 
+                url: "https://example.com/video", 
+                description: "使用AI技术自动编辑和增强视频内容",
+                clicks: 25, 
+                likes: 30,
+                affections: 22,
+                favorites: 28,
+                shares: 8,
+                category: "视频",
+                author: "VideoAI团队",
+                created: Date.now() - 4 * 24 * 60 * 60 * 1000
+            },
+            { 
+                id: 6, 
+                name: "音乐生成器", 
+                url: "https://example.com/music", 
+                description: "利用AI生成原创音乐作品",
+                clicks: 18, 
+                likes: 25,
+                affections: 20,
+                favorites: 22,
+                shares: 6,
+                category: "音乐",
+                author: "MusicAI",
+                created: Date.now() - 5 * 24 * 60 * 60 * 1000
+            },
+            { 
+                id: 7, 
+                name: "数据科学助手", 
+                url: "https://example.com/datascience", 
+                description: "AI驱动的数据分析与可视化工具",
+                clicks: 32, 
+                likes: 28,
+                affections: 25,
+                favorites: 30,
+                shares: 10,
+                category: "研究",
+                author: "DataSci Inc",
+                created: Date.now() - 6 * 24 * 60 * 60 * 1000
+            },
+            { 
+                id: 8, 
+                name: "AI写作助手", 
+                url: "https://example.com/writing", 
+                description: "帮助您创作高质量内容的AI写作工具",
+                clicks: 45, 
+                likes: 40,
+                affections: 35,
+                favorites: 48,
+                shares: 15,
+                category: "写作",
+                author: "WriteAI",
+                created: Date.now() - 1 * 24 * 60 * 60 * 1000
+            }
+        ];
+        
+        // 工具数组
+        let tools = [];
+        let currentPage = 1;
+        let currentCategory = 'all';
+        const toolsPerPage = 8;
+        let categories = Object.keys(categoryColors);
+        let searchQuery = '';
+        let searchType = 'fuzzy';
+        
+        // DOM元素
+        const toolsContainer = document.getElementById('tools-container');
+        const paginationContainer = document.getElementById('pagination');
+        const categoriesContainer = document.getElementById('categories-container');
+        const statsContainer = document.getElementById('stats-container');
+        const addToolBtn = document.getElementById('add-tool-btn');
+        const toolNameInput = document.getElementById('tool-name');
+        const toolUrlInput = document.getElementById('tool-url');
+        const toolDescInput = document.getElementById('tool-description');
+        const toolCategorySelect = document.getElementById('tool-category');
+        const newCategoryInput = document.getElementById('new-category');
+        const editModal = document.getElementById('edit-modal');
+        const editToolName = document.getElementById('edit-tool-name');
+        const editToolUrl = document.getElementById('edit-tool-url');
+        const editToolDesc = document.getElementById('edit-tool-description');
+        const editToolCategory = document.getElementById('edit-tool-category');
+        const editToolId = document.getElementById('edit-tool-id');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const closeEditModal = document.getElementById('close-edit-modal');
+        const headerTrigger = document.getElementById('header-trigger');
+        const footerTrigger = document.getElementById('footer-trigger');
+        const addToolForm = document.getElementById('add-tool-form');
+        const closeFormBtn = document.getElementById('close-form-btn');
+        const uploadForm = document.getElementById('upload-form');
+        const fileUpload = document.getElementById('file-upload');
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const authorName = document.getElementById('author-name');
+        const authorWechat = document.getElementById('author-wechat');
+        const fileDescription = document.getElementById('file-description');
+        const uploadBtn = document.getElementById('upload-btn');
+        const closeUploadBtn = document.getElementById('close-upload-btn');
+        const addToolTip = document.getElementById('add-tool-tip');
+        const statsSection = document.getElementById('stats-section');
+        const closeStatsBtn = document.getElementById('close-stats');
+        const refreshStatsBtn = document.getElementById('refresh-stats');
+        const rankingModal = document.getElementById('ranking-modal');
+        const rankingTitle = document.getElementById('ranking-title');
+        const rankingList = document.getElementById('ranking-list');
+        const closeRanking = document.getElementById('close-ranking');
+        const shareModal = document.getElementById('share-modal');
+        const shareTitle = document.getElementById('share-title');
+        const shareLink = document.getElementById('share-link');
+        const copyLinkBtn = document.getElementById('copy-link');
+        const closeShare = document.getElementById('close-share');
+        const copyright = document.getElementById('copyright');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const fuzzySearchRadio = document.getElementById('fuzzy-search');
+        const exactSearchRadio = document.getElementById('exact-search');
+        const resultsCount = document.getElementById('results-count');
+        const resetFormBtn = document.getElementById('reset-form-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const importBtn = document.getElementById('import-btn');
+        const importModal = document.getElementById('import-modal');
+        const closeImportModal = document.getElementById('close-import-modal');
+        const importJsonBtn = document.getElementById('import-json-btn');
+        const importExcelBtn = document.getElementById('import-excel-btn');
+        const importFileContainer = document.getElementById('import-file-container');
+        const importFileUpload = document.getElementById('import-file-upload');
+        const importFileInput = document.getElementById('import-file-input');
+        const importFileName = document.getElementById('import-file-name');
+        const importOptions = document.getElementById('import-options');
+        const confirmImportBtn = document.getElementById('confirm-import-btn');
+        const categorySuggestions = document.getElementById('category-suggestions');
+        const suggestedCategories = document.getElementById('suggested-categories');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 更新版权年份
+            const year = new Date().getFullYear();
+            copyright.textContent = `© ${year} 艾兜兜儿AI工具箱 | 让AI工具触手可及`;
+            
+            loadTools();
+            renderCategories();
+            renderCategoryOptions();
+            renderTools();
+            setupEventListeners();
+        });
+        
+        // 加载工具
+        function loadTools() {
+            const savedTools = localStorage.getItem('aiTools');
+            const savedCategories = localStorage.getItem('aiCategories');
+            
+            if (savedTools) {
+                tools = JSON.parse(savedTools);
+            } else {
+                // 如果没有保存的数据，使用示例数据
+                tools = [...sampleTools];
+                saveTools();
+            }
+            
+            if (savedCategories) {
+                categories = JSON.parse(savedCategories);
+            }
+        }
+        
+        // 保存工具
+        function saveTools() {
+            localStorage.setItem('aiTools', JSON.stringify(tools));
+            localStorage.setItem('aiCategories', JSON.stringify(categories));
+        }
+        
+        // 渲染分类
+        function renderCategories() {
+            categoriesContainer.innerHTML = '';
+            
+            // 添加"全部"分类
+            const allBtn = document.createElement('button');
+            allBtn.className = `category-btn ${currentCategory === 'all' ? 'active' : ''}`;
+            allBtn.textContent = '全部';
+            allBtn.dataset.category = 'all';
+            allBtn.addEventListener('click', () => {
+                currentCategory = 'all';
+                currentPage = 1;
+                renderTools();
+                renderCategories();
+            });
+            categoriesContainer.appendChild(allBtn);
+            
+            // 添加各分类按钮
+            categories.forEach(category => {
+                const categoryBtn = document.createElement('button');
+                categoryBtn.className = `category-btn ${currentCategory === category ? 'active' : ''}`;
+                categoryBtn.textContent = category;
+                categoryBtn.dataset.category = category;
+                categoryBtn.addEventListener('click', () => {
+                    currentCategory = category;
+                    currentPage = 1;
+                    renderTools();
+                    renderCategories();
+                });
+                categoriesContainer.appendChild(categoryBtn);
+            });
+        }
+        
+        // 渲染分类选项
+        function renderCategoryOptions() {
+            toolCategorySelect.innerHTML = '';
+            editToolCategory.innerHTML = '';
+            
+            // 添加默认选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "请选择分类";
+            toolCategorySelect.appendChild(defaultOption.cloneNode(true));
+            editToolCategory.appendChild(defaultOption.cloneNode(true));
+            
+            // 添加分类选项
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                toolCategorySelect.appendChild(option.cloneNode(true));
+                editToolCategory.appendChild(option.cloneNode(true));
+            });
+            
+            // 添加"其他"选项
+            const otherOption = document.createElement('option');
+            otherOption.value = "其他";
+            otherOption.textContent = "其他";
+            toolCategorySelect.appendChild(otherOption.cloneNode(true));
+            editToolCategory.appendChild(otherOption.cloneNode(true));
+        }
+        
+        // 自动分类工具
+        function categorizeTool(name) {
+            const lowerName = name.toLowerCase();
+            
+            for (const [category, keywords] of Object.entries(categoryKeywords)) {
+                if (keywords.some(keyword => lowerName.includes(keyword.toLowerCase()))) {
+                    return category;
+                }
+            }
+            
+            return '其他';
+        }
+        
+        // 获取过滤后的工具
+        function getFilteredTools() {
+            let filteredTools = tools;
+            
+            // 应用分类筛选
+            if (currentCategory !== 'all') {
+                filteredTools = filteredTools.filter(tool => tool.category === currentCategory);
+            }
+            
+            // 应用搜索筛选
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                if (searchType === 'exact') {
+                    filteredTools = filteredTools.filter(tool => 
+                        tool.name.toLowerCase() === query || 
+                        tool.description.toLowerCase().includes(query)
+                } else {
+                    // 模糊搜索
+                    filteredTools = filteredTools.filter(tool => 
+                        tool.name.toLowerCase().includes(query) || 
+                        (tool.description && tool.description.toLowerCase().includes(query)) ||
+                        (tool.category && tool.category.toLowerCase().includes(query))
+                }
+            }
+            
+            return filteredTools;
+        }
+        
+        // 渲染工具
+        function renderTools() {
+            toolsContainer.innerHTML = '';
+            
+            const filteredTools = getFilteredTools();
+            const totalTools = filteredTools.length;
+            
+            // 更新搜索结果信息
+            if (searchQuery) {
+                resultsCount.textContent = `找到 ${totalTools} 个匹配的工具`;
+                clearSearchBtn.style.display = 'block';
+            } else {
+                resultsCount.textContent = `显示全部工具 (${totalTools})`;
+                clearSearchBtn.style.display = 'none';
+            }
+            
+            if (totalTools === 0) {
+                toolsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>没有找到匹配的工具</h3>
+                        <p>请尝试其他搜索词或分类</p>
+                    </div>
+                `;
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            // 计算分页
+            const totalPages = Math.ceil(totalTools / toolsPerPage);
+            const startIndex = (currentPage - 1) * toolsPerPage;
+            const endIndex = Math.min(startIndex + toolsPerPage, totalTools);
+            const toolsToShow = filteredTools.slice(startIndex, endIndex);
+            
+            // 渲染工具卡片
+            toolsToShow.forEach(tool => {
+                const toolCard = document.createElement('div');
+                toolCard.className = 'tool-card';
+                toolCard.dataset.id = tool.id;
+                
+                // 安全处理：对名称和描述进行消毒
+                const safeName = sanitizeInput(tool.name);
+                const safeDesc = sanitizeInput(tool.description);
+                const safeAuthor = tool.author ? sanitizeInput(tool.author) : '';
+                
+                toolCard.innerHTML = `
+                    <div class="tool-content">
+                        <div class="tool-name">
+                            <span>${safeName}</span>
+                        </div>
+                        ${safeAuthor ? `<div class="tool-author"><i class="fas fa-user"></i> 作者: ${safeAuthor}</div>` : ''}
+                        <div class="tool-description">${safeDesc}</div>
+                        <div class="card-stats">
+                            <div class="clicks-count">
+                                <i class="fas fa-mouse-pointer"></i> ${tool.clicks || 0} 次点击
+                            </div>
+                            <span class="tool-category ${categoryColors[tool.category] || 'category-other'}">${tool.category}</span>
+                        </div>
+                        <div class="card-actions">
+                            <a href="${tool.url}" target="_blank" class="action-btn visit-btn" data-id="${tool.id}">
+                                <i class="fas fa-rocket"></i> 去使用
+                            </a>
+                        </div>
+                        <div class="action-buttons">
+                            <div class="action-icon like-btn" data-id="${tool.id}" data-type="likes">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span class="action-count">${tool.likes || 0}</span>
+                            </div>
+                            <div class="action-icon affection-btn" data-id="${tool.id}" data-type="affections">
+                                <i class="fas fa-heart"></i>
+                                <span class="action-count">${tool.affections || 0}</span>
+                            </div>
+                            <div class="action-icon favorite-btn" data-id="${tool.id}" data-type="favorites">
+                                <i class="fas fa-star"></i>
+                                <span class="action-count">${tool.favorites || 0}</span>
+                            </div>
+                            <div class="action-icon share-btn" data-id="${tool.id}" data-type="shares">
+                                <i class="fas fa-share-alt"></i>
+                                <span class="action-count">${tool.shares || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                toolsContainer.appendChild(toolCard);
+            });
+            
+            // 渲染分页
+            renderPagination(totalPages);
+        }
+        
+        // 渲染分页控件
+        function renderPagination(totalPages) {
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 添加上一页按钮
+            const prevBtn = document.createElement('div');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTools();
+                }
+            });
+            paginationContainer.appendChild(prevBtn);
+            
+            // 添加页码按钮
+            const maxPagesToShow = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            let endPage = startPage + maxPagesToShow - 1;
+            
+            if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(1, endPage - maxPagesToShow + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('div');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTools();
+                });
+                paginationContainer.appendChild(pageBtn);
+            }
+            
+            // 添加下一页按钮
+            const nextBtn = document.createElement('div');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTools();
+                }
+            });
+            paginationContainer.appendChild(nextBtn);
+        }
+        
+        // 导出数据
+        function exportData(format) {
+            if (format === 'json') {
+                const dataStr = JSON.stringify(tools, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `ai-tools-${new Date().toISOString().slice(0,10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                document.body.appendChild(linkElement);
+                linkElement.click();
+                document.body.removeChild(linkElement);
+                
+                // 显示成功提示
+                addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> JSON导出成功！`;
+                addToolTip.style.display = 'block';
+                addToolTip.style.background = 'var(--success-color)';
+                setTimeout(() => {
+                    addToolTip.style.display = 'none';
+                }, 3000);
+            } else if (format === 'excel') {
+                // 准备Excel数据
+                const ws = XLSX.utils.json_to_sheet(tools.map(tool => {
+                    return {
+                        '工具名称': tool.name,
+                        '工具网址': tool.url,
+                        '工具描述': tool.description,
+                        '分类': tool.category,
+                        '作者': tool.author || '',
+                        '点击量': tool.clicks || 0,
+                        '点赞数': tool.likes || 0,
+                        '收藏数': tool.favorites || 0
+                    };
+                }));
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "AI工具列表");
+                
+                // 导出Excel文件
+                XLSX.writeFile(wb, `ai-tools-${new Date().toISOString().slice(0,10)}.xlsx`);
+                
+                // 显示成功提示
+                addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> Excel导出成功！`;
+                addToolTip.style.display = 'block';
+                addToolTip.style.background = 'var(--success-color)';
+                setTimeout(() => {
+                    addToolTip.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 导入数据
+        function importData(file, importOption) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    let importedTools = [];
+                    
+                    if (file.name.endsWith('.json')) {
+                        importedTools = JSON.parse(e.target.result);
+                    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        importedTools = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        // 转换Excel数据格式
+                        importedTools = importedTools.map(item => ({
+                            id: Date.now() + Math.floor(Math.random() * 1000),
+                            name: item['工具名称'] || '',
+                            url: item['工具网址'] || '',
+                            description: item['工具描述'] || '',
+                            category: item['分类'] || '其他',
+                            author: item['作者'] || '',
+                            clicks: item['点击量'] || 0,
+                            likes: item['点赞数'] || 0,
+                            favorites: item['收藏数'] || 0,
+                            created: Date.now()
+                        }));
+                    }
+                    
+                    // 处理导入选项
+                    if (importOption === 'replace') {
+                        tools = importedTools;
+                    } else if (importOption === 'merge') {
+                        // 合并数据，避免重复
+                        const existingIds = new Set(tools.map(t => t.id));
+                        importedTools.forEach(tool => {
+                            if (!existingIds.has(tool.id)) {
+                                tools.push(tool);
+                            }
+                        });
+                    }
+                    
+                    // 更新分类列表
+                    const newCategories = new Set(categories);
+                    importedTools.forEach(tool => {
+                        if (tool.category && !newCategories.has(tool.category)) {
+                            newCategories.add(tool.category);
+                        }
+                    });
+                    categories = Array.from(newCategories);
+                    
+                    saveTools();
+                    renderCategories();
+                    renderCategoryOptions();
+                    renderTools();
+                    
+                    // 关闭导入模态框
+                    importModal.style.display = 'none';
+                    
+                    // 显示成功提示
+                    addToolTip.innerHTML = `<i class="fas fa-check-circle"></i> 成功导入 ${importedTools.length} 个工具！`;
+                    addToolTip.style.display = 'block';
+                    addToolTip.style.background = 'var(--success-color)';
+                    setTimeout(() => {
+                        addToolTip.style.display = 'none';
+                    }, 3000);
+                } catch (error) {
+                    alert('导入失败：文件格式不正确或数据无效');
+                    console.error('导入错误:', error);
+                }
+            };
+            
+            if (file.name.endsWith('.json')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+        
+        // 显示分类建议
+        function showCategorySuggestions(input) {
+            if (!input) {
+                categorySuggestions.style.display = 'none';
+                return;
+            }
+            
+            const inputLower = input.toLowerCase();
+            const matchedCategories = categories.filter(category => 
+                category.toLowerCase().includes(inputLower)
+            );
+            
+            if (matchedCategories.length === 0) {
+                categorySuggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestedCategories.innerHTML = '';
+            matchedCategories.forEach(category => {
+                const categoryBtn = document.createElement('button');
+                categoryBtn.className = 'category-btn';
+                categoryBtn.textContent = category;
+                categoryBtn.style.padding = '4px 8px';
+                categoryBtn.style.fontSize = '0.8rem';
+                categoryBtn.addEventListener('click', () => {
+                    toolCategorySelect.value = category;
+                    newCategoryInput.value = '';
+                    categorySuggestions.style.display = 'none';
+                });
+                suggestedCategories.appendChild(categoryBtn);
+            });
+            
+            categorySuggestions.style.display = 'block';
+        }
+        
+        // 设置事件监听
+        function setupEventListeners() {
+            // 搜索功能
+            searchBtn.addEventListener('click', () => {
+                searchQuery = searchInput.value.trim();
+                currentPage = 1;
+                renderTools();
+            });
+            
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    searchQuery = searchInput.value.trim();
+                    currentPage = 1;
+                    renderTools();
+                }
+            });
+            
+            fuzzySearchRadio.addEventListener('change', () => {
+                searchType = 'fuzzy';
+                if (searchQuery) {
+                    renderTools();
+                }
+            });
+            
+            exactSearchRadio.addEventListener('change', () => {
+                searchType = 'exact';
+                if (searchQuery) {
+                    renderTools();
+                }
+            });
+            
+            clearSearchBtn.addEventListener('click', () => {
+                searchQuery = '';
+                searchInput.value = '';
+                currentPage = 1;
+                renderTools();
+            });
+            
+            // 分类建议
+            newCategoryInput.addEventListener('input', (e) => {
+                showCategorySuggestions(e.target.value);
+            });
+            
+            // 重置表单
+            resetFormBtn.addEventListener('click', () => {
+                toolNameInput.value = '';
+                toolUrlInput.value = '';
+                toolDescInput.value = '';
+                toolCategorySelect.value = '';
+                newCategoryInput.value = '';
+                categorySuggestions.style.display = 'none';
+            });
+            
+            // 导出功能
+            exportBtn.addEventListener('click', () => {
+                // 显示导出选项
+                const exportType = confirm('请选择导出格式：\n\n确定 - Excel\n取消 - JSON');
+                exportData(exportType ? 'excel' : 'json');
+            });
+            
+            // 导入功能
+            importBtn.addEventListener('click', () => {
+                importModal.style.display = 'flex';
+            });
+            
+            closeImportModal.addEventListener('click', () => {
+                importModal.style.display = 'none';
+            });
+            
+            importJsonBtn.addEventListener('click', () => {
+                importFileContainer.style.display = 'block';
+                importOptions.style.display = 'block';
+                confirmImportBtn.style.display = 'block';
+                importFileInput.accept = '.json';
+            });
+            
+            importExcelBtn.addEventListener('click', () => {
+                importFileContainer.style.display = 'block';
+                importOptions.style.display = 'block';
+                confirmImportBtn.style.display = 'block';
+                importFileInput.accept = '.xlsx, .xls';
+            });
+            
+            importFileUpload.addEventListener('click', () => {
+                importFileInput.click();
+            });
+            
+            importFileInput.addEventListener('change', (e) => {
+                if (importFileInput.files.length > 0) {
+                    const file = importFileInput.files[0];
+                    importFileName.textContent = file.name;
+                }
+            });
+            
+            confirmImportBtn.addEventListener('click', () => {
+                if (importFileInput.files.length === 0) {
+                    alert('请先选择要导入的文件');
+                    return;
+                }
+                
+                const file = importFileInput.files[0];
+                const importOption = document.querySelector('input[name="import-option"]:checked').value;
+                importData(file, importOption);
+            });
+            
+            // 其他原有事件监听器...
+        }
+    </script>
+</body>
+</html>
