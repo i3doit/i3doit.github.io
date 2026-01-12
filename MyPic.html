@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI海报大师 最终定制版</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --apple-blue: #007AFF;
+            --bg-pale: #FDFCF8;
+            --text-main: #1C1C1E;
+            --text-sec: #8E8E93;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, "PingFang SC", sans-serif; }
+        body { margin: 0; background: #F5F5F7; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px 0; }
+
+        /* Toast 提示 */
+        #toast { position: fixed; top: 15%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 24px; border-radius: 20px; font-size: 13px; z-index: 9999; display: none; }
+
+        /* 海报主容器 */
+        .poster-box {
+            width: 360px; height: 640px; background: var(--bg-pale);
+            position: relative; display: flex; flex-direction: column;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+        }
+
+        /* 顶部区域 */
+        .p-header { padding: 20px 25px 5px; display: flex; align-items: center; gap: 12px; }
+        .p-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; overflow: hidden; background: #EEE; cursor: pointer; }
+        .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .p-nick-wrap { display: flex; flex-direction: column; }
+        .p-nick { border: none; background: transparent; font-size: 16px; font-weight: 600; outline: none; color: var(--text-main); padding: 0; }
+        .p-sub-text { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+
+        /* 标题区域 */
+        .p-title-wrap { padding: 8px 25px 0; position: relative; }
+        .p-title { 
+            font-size: 19px; font-weight: 700; line-height: 1.3; outline: none; color: var(--text-main);
+            min-height: 1.3em; cursor: text;
+        }
+        .p-title:empty::before { content: "点击自动粘贴新内容"; color: #CCC; font-weight: 400; }
+
+        /* 图片区：高度宽度自适应留白 */
+        .p-main-img-area { 
+            flex: 1; display: flex; align-items: center; justify-content: center; 
+            padding: 15px 30px; overflow: hidden; position: relative;
+        }
+        #display-img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; display: none; z-index: 2; }
+        .img-tip { color: #BBB; font-size: 12px; border: 1px dashed #CCC; padding: 15px 30px; border-radius: 8px; cursor: pointer; text-align: center; }
+
+        /* 底部信息层 */
+        .p-footer { 
+            padding: 15px 25px 25px; background: rgba(255,255,255,0.2); 
+            font-size: 10px; color: var(--text-sec); line-height: 1.8; border-top: 1px solid rgba(0,0,0,0.03);
+        }
+        .f-link { color: var(--apple-blue); font-weight: 700; cursor: pointer; text-decoration: none; }
+        .f-copyable { cursor: pointer; border-bottom: 1px dotted #CCC; }
+
+        /* 二维码 */
+        #qr-drag-node {
+            position: absolute; bottom: 100px; right: 25px; 
+            background: #FFF; padding: 8px; border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08); cursor: move; touch-action: none;
+            display: flex; flex-direction: column; align-items: center; z-index: 100;
+        }
+        #qrcode-view { width: 80px; height: 80px; position: relative; }
+
+        /* 外部控制 */
+        .controls { width: 90%; max-width: 360px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .btn-group { width: 360px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .btn { padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+        .btn-blue { background: var(--apple-blue); color: #fff; }
+        .btn-white { background: #fff; border: 1px solid #DDD; }
+    </style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div class="controls">
+    <input type="text" id="url-input" value="https://dkfile.net/aidder/QRCode1.3.html" placeholder="生成二维码的链接" style="padding:10px; border-radius:8px; border:1px solid #DDD;" oninput="updateQR()">
+</div>
+
+<div class="poster-box" id="capture-area">
+    <div class="p-header">
+        <div class="p-avatar" onclick="triggerFile('file-avatar')">
+            <img id="view-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix">
+        </div>
+        <div class="p-nick-wrap">
+            <input type="text" class="p-nick" id="view-nick" value="AI 程序员小艾">
+            <span class="p-sub-text">邀你一起体验新工具</span>
+        </div>
+    </div>
+
+    <div class="p-title-wrap">
+        <div class="p-title" id="view-title" contenteditable="true" onfocus="handleTitleFocus()">邀你扫码体验更多工具</div>
+    </div>
+
+    <div class="p-main-img-area" onclick="triggerFile('file-main')">
+        <div class="img-tip">点击上传展示图片<br>(自动适配宽高且留白)</div>
+        <img id="display-img" src="">
+    </div>
+
+    <div class="p-footer">
+        技术支持：<span class="f-link" onclick="goStar()">艾兜兜儿</span> | 
+        微信号：<span class="f-copyable" onclick="copyWX('857023577')">857023577</span><br>
+        © <span id="year-text"></span> 
+        <span class="f-link" onclick="goMP()">AI 程序员小艾</span> 版权所有
+    </div>
+
+    <div id="qr-drag-node">
+        <div id="qrcode-view"></div>
+        <div style="font-size:8px; color:#FF3B30; margin-top:4px; transform: scale(0.9);">扫码立即体验</div>
+    </div>
+</div>
+
+<div class="btn-group">
+    <button class="btn btn-white" onclick="triggerFile('file-logo')">设置 Logo</button>
+    <button class="btn btn-blue" onclick="downloadPoster()">保存到相册</button>
+</div>
+
+<input type="file" id="file-main" hidden accept="image/*" onchange="previewFile(event, 'display-img')">
+<input type="file" id="file-avatar" hidden accept="image/*" onchange="previewFile(event, 'view-avatar')">
+<input type="file" id="file-logo" hidden accept="image/*" onchange="previewFile(event, 'qr-logo-target')">
+
+<script>
+    let qr;
+    const starUrl = "https://t.zsxq.com/XNHXs";
+    const mpUrl = "https://mp.weixin.qq.com/s/5LNiXmYNWlsfBUp0kaiAtQ";
+
+    window.onload = () => {
+        qr = new QRCode(document.getElementById("qrcode-view"), {
+            text: document.getElementById('url-input').value,
+            width: 80, height: 80, colorDark: "#000", colorLight: "#fff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        initYear();
+        initDraggable(document.getElementById('qr-drag-node'));
+    };
+
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
+    }
+
+    // 标题自动清空并尝试粘贴
+    async function handleTitleFocus() {
+        const el = document.getElementById('view-title');
+        el.innerText = ""; // 自动清空
+        
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text) {
+                el.innerText = text;
+                toast("已自动粘贴剪切板内容");
+            }
+        } catch (err) {
+            console.log("无法读取剪切板，请手动输入");
+        }
+    }
+
+    // 年份逻辑
+    function initYear() {
+        const currentYear = new Date().getFullYear();
+        const yearBox = document.getElementById('year-text');
+        if (currentYear > 2026) {
+            yearBox.innerText = `2026-${currentYear}`;
+        } else {
+            yearBox.innerText = currentYear;
+        }
+    }
+
+    // 跳转与复制逻辑
+    function goStar() { window.location.href = starUrl; }
+    
+    function copyWX(num) {
+        navigator.clipboard.writeText(num);
+        toast("微信号已复制，快去添加好友吧！");
+    }
+
+    function goMP() {
+        navigator.clipboard.writeText("AI 程序员小艾");
+        toast("已复制名称，正在前往公众号...");
+        setTimeout(() => window.location.href = mpUrl, 1000);
+    }
+
+    // 其它功能函数
+    function triggerFile(id) { document.getElementById(id).click(); }
+
+    function previewFile(e, tid) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = document.getElementById(tid);
+            img.src = ev.target.result;
+            img.style.display = 'block';
+            if(tid === 'display-img') document.querySelector('.img-tip').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function updateQR() {
+        qr.clear();
+        qr.makeCode(document.getElementById('url-input').value);
+    }
+
+    function initDraggable(el) {
+        let sx = 0, sy = 0, dx = 0, dy = 0;
+        const container = document.getElementById('capture-area');
+        const start = (e) => {
+            const p = e.type.includes('touch') ? e.touches[0] : e;
+            sx = p.clientX; sy = p.clientY;
+            dx = el.offsetLeft; dy = el.offsetTop;
+            document.onmousemove = move; document.onmouseup = end;
+            document.ontouchmove = move; document.ontouchend = end;
+        };
+        const move = (e) => {
+            const p = e.type.includes('touch') ? e.touches[0] : e;
+            let nx = dx + (p.clientX - sx);
+            let ny = dy + (p.clientY - sy);
+            nx = Math.max(0, Math.min(nx, container.offsetWidth - el.offsetWidth));
+            ny = Math.max(0, Math.min(ny, container.offsetHeight - el.offsetHeight));
+            el.style.left = nx + 'px'; el.style.top = ny + 'px';
+        };
+        const end = () => { document.onmousemove = null; document.onmouseup = null; document.ontouchmove = null; document.ontouchend = null; };
+        el.onmousedown = start; el.ontouchstart = start;
+    }
+
+    async function downloadPoster() {
+        toast("高清海报生成中...");
+        const canvas = await html2canvas(document.getElementById('capture-area'), { scale: 3, useCORS: true });
+        const link = document.createElement('a');
+        link.download = `AI-Poster-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    }
+</script>
+</body>
+</html>
